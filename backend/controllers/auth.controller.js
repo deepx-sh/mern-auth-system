@@ -1,7 +1,9 @@
+
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { sendWelcomeEmail } from "./email.controller.js";
 
 const generateAccessTokens = async (userId) => {
     
@@ -58,6 +60,9 @@ export const register = asyncHandler(async (req, res) => {
         maxAge:7*24*60*60*1000,
     }
 
+    // Send Welcome Email
+
+    await sendWelcomeEmail(createdUser);
     return res.status(201).cookie("accessToken", token, options).json(new ApiResponse(200, createdUser, "User registration successfully!"));
 
 })
