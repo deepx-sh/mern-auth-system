@@ -153,8 +153,8 @@ export const verifyEmailOtp = asyncHandler(async (req, res) => {
 
     // Check expire
     if (Date.now() > user.verifyOtpExpireAt) {
-        user.verifyOtp = undefined;
-        user.verifyOtpExpireAt = undefined;
+        user.verifyOtp = "";
+        user.verifyOtpExpireAt = 0;
         await user.save();
 
         throw new ApiError(400,"OTP has expired. Please request a new one")
@@ -169,8 +169,8 @@ export const verifyEmailOtp = asyncHandler(async (req, res) => {
 
     // OTP valid
     user.isVerified = true;
-    user.verifyOtp = undefined;
-    user.verifyOtpExpireAt = undefined;
+    user.verifyOtp = "";
+    user.verifyOtpExpireAt = 0;
     await user.save();
 
 
