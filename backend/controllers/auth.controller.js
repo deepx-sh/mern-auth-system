@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendWelcomeEmail } from "./email.controller.js";
 import { generateAndSendOtp } from "../utils/generateSendOtp.js";
+import jwt from 'jsonwebtoken'
 
 const generateAccessTokens = async (userId) => {
     
@@ -193,4 +194,127 @@ export const verifyEmailOtp = asyncHandler(async (req, res) => {
     }
 
     return res.status(200).cookie("accessToken",token,options).json(new ApiResponse(200,loggedInUser,"Email Verified Successfully. Logged in"))
+});
+
+
+// Check if user is authenticated or not
+
+export const isAuthenticated = asyncHandler(async (req, res) => {
+    if (!req.user) {
+        throw new ApiError(401,"User is not authenticated")
+    } 
+     return res.status(200).json(new ApiResponse(200,{},"User is authenticated"))
+});
+
+
+// Send Password Reset OTP
+export const sendPasswordResetOtp = asyncHandler(async (req, res) => {
+    const { email } = req.body || {}
+    
+    if (!email) {
+        throw new ApiError(400,"Email is required")
+    }
+
+    // Find User by Email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        return res.status(200).json(new ApiResponse(200,{},"If this email is registered, an OTP has been sent"))
+    }
+
+    // Only allow if user email is already verified
+    if (!user.isVerified) {
+        throw new ApiError(400,"Please verify your email before resetting password")
+    }
+
+    const existUser=await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt")
+    // Generate reset otp and send to registered email
+    await generateAndSendOtp(existUser, "resetPassword");
+
+    return res.status(200).json(new ApiResponse(200,{},"Password reset OTP sent to your registered email"))
+});
+
+
+// Verify Reset OTP
+
+export const verifyResetPasswordOtp = asyncHandler(async (req, res) => {
+    const { email, otp } = req.body || {};
+
+    if (!email || !otp) {
+        throw new ApiError(400,"Email and OTP are required")
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new ApiError(404,"User not found")
+    }
+
+    if (!user.resetOtp || !user.resetOtpExpireAt) {
+        throw new ApiError(400,"No reset OTP found. Please request new one")
+    }
+
+    // Check for expiry
+    if (Date.now() > user.resetOtpExpireAt) {
+        user.resetOtp = "";
+        user.resetOtpExpireAt = 0;
+        await user.save();
+
+        throw new ApiError(400,"OTP has expired. Please request new one")
+    }
+
+    // Compare OTP
+    const isMatch = await bcrypt.compare(otp, user.resetOtp);
+
+    if (!isMatch) {
+        throw new ApiError(400,"Invalid OTP")
+    }
+
+    // OTP Correct
+    user.resetOtp = "";
+    user.resetOtpExpireAt = 0;
+
+    await user.save();
+
+    // Short Lived reset token
+    const resetToken = jwt.sign({
+        _id: user._id,
+        email: user.email,
+        purpose:"resetPassword"
+    }, process.env.JWT_RESET_PASSWORD_SECRET,
+        { expiresIn: process.env.JWT_RESET_PASSWORD_EXPIRE });
+    
+    return res.status(200).json(new ApiResponse(200,{resetToken},"OTP verified successfully. You can now reset your password"))
+});
+
+
+export const resetPassword = asyncHandler(async (req, res) => {
+    const { resetToken, newPassword } = req.body || {};
+    
+    if (!resetToken || !newPassword) {
+        throw new ApiError(400,"Reset token and new password are required")
+    }
+
+    let decodedInfo;
+    try {
+        decodedInfo=await jwt.verify(resetToken,process.env.JWT_RESET_PASSWORD_SECRET)
+    } catch (error) {
+        throw new ApiError(400,"Invalid or expire reset token")
+    }
+     
+    const user = await User.findById(decodedInfo._id);
+
+    if (!user) {
+        throw new ApiError(404,"User not found")
+    }
+
+    if (decodedInfo.purpose !== "resetPassword") {
+        throw new ApiError(400,"Invalid reset token purpose")
+    }
+
+    // Hash Password and save
+    user.password = newPassword;
+    await user.save();
+
+    return res.status(200).json(new ApiResponse(200,{},"Password reset successfully"))
 })

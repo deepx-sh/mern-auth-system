@@ -48,8 +48,8 @@ const getEmailContent = (purpose, user, otp)=>{
     }
     if (purpose === "resetPassword") {
         return {
-            subject: "SecureNation - Verify you email 🔑",
-            html:resetPasswordTemplate(user,otp)
+            subject: "SecureNation - Reset your password 🔑",
+            html:resetPasswordTemplate(user.name,otp)
         }
     }
     
