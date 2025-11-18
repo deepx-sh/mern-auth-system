@@ -13,7 +13,7 @@ export const verifyEmailTemplate = (name, otp) => {
     <h1 style="letter-spacing:4px">${otp}</h1>
     <p>This code expire in <strong>5 minutes</strong></p>
     <p>If you did't request this, you can safely ignore this email</p>
-    <p>Cheers, <strong>The SecureNation Team</strong>></p>`;
+    <p>Cheers, <strong>The SecureNation Team</strong></p>`;
 };
 
 export const resetPasswordTemplate = (name, otp) => {
