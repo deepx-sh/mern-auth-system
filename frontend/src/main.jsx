@@ -21,7 +21,7 @@ const router = createBrowserRouter(
       <Route path="" element={<Home />} />
       <Route path="verify-email" element={<VerifyEmailOtp />} />
       <Route path="reset-password" element={<ResetPassword />} />
-      <Route path="forget-password" element={<ForgetPassword />} />
+      <Route path="forgot-password" element={<ForgetPassword />} />
       <Route path="login" element={<Login/> } />
     </Route>
   )
