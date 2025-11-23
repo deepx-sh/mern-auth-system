@@ -14,6 +14,7 @@ import VerifyEmailOtp from "./pages/auth/VerifyEmailOtp.jsx";
 import ResetPassword from "./pages/auth/ResetPassword.jsx";
 import ForgetPassword from "./pages/auth/ForgetPassword.jsx";
 import Login from "./pages/auth/Login.jsx";
+import Register from "./pages/auth/Register.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -22,6 +23,7 @@ const router = createBrowserRouter(
       <Route path="verify-email" element={<VerifyEmailOtp />} />
       <Route path="reset-password" element={<ResetPassword />} />
       <Route path="forgot-password" element={<ForgetPassword />} />
+      <Route path="register" element={ <Register/>} />
       <Route path="login" element={<Login/> } />
     </Route>
   )

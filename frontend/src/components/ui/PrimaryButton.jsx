@@ -18,7 +18,7 @@ const PrimaryButton = ({children,loading=false,disabled=false,className="",type=
         </svg>
             )}
 
-            <span>{ children}</span>
+            <span>{children}</span>
     </button>
   )
 }
