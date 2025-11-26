@@ -6,6 +6,7 @@ import {EyeOff,Eye} from 'lucide-react'
 
 import TextInput from '../../components/ui/TextInput'
 import PrimaryButton from '../../components/ui/PrimaryButton'
+import apiClient from '../../lib/apiClient';
 const Register = () => {
   const navigate = useNavigate();
 
@@ -42,7 +43,7 @@ const Register = () => {
     setFieldErrors({});
 
     try {
-      await axios.post("/api/auth/register", form, { withCredentials: true });
+      await apiClient.post("/auth/register", form);
 
       localStorage.setItem("pendingEmail", form.email);
       navigate("/verify-email", { state: { email: form.email } });
