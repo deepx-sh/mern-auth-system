@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+// import axios from 'axios'
 
 import {EyeOff,Eye} from 'lucide-react'
 
@@ -48,9 +48,11 @@ const Register = () => {
       localStorage.setItem("pendingEmail", form.email);
       navigate("/verify-email", { state: { email: form.email } });
     } catch (error) {
+      console.log(error);
+      
       const data = error?.response?.data || {};
 
-      if (data.errors && typeof data.errors === "object") {
+      if (data.errors && typeof data.errors === "object" && Object.keys(data.errors).length>0) {
         setFieldErrors(data.errors);
       } else {
         const newFieldError = {};
@@ -67,6 +69,7 @@ const Register = () => {
     } finally {
       setLoading(false);
     }
+    
   }
   return (
     <main className='min-h-screen flex items-center justify-center bg-[#F5F4F1] p-6'>

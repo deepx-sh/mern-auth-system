@@ -1,9 +1,10 @@
-import axios from 'axios';
+// import axios from 'axios';
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import TextInput from '../../components/ui/TextInput';
 import { Eye, EyeOff } from 'lucide-react';
 import PrimaryButton from '../../components/ui/PrimaryButton';
+import apiClient from '../../lib/apiClient';
 const Login = () => {
   const navigate = useNavigate();
 
@@ -37,11 +38,11 @@ const Login = () => {
 
     setLoading(true);
     try {
-      await axios.post("/api/auth/login", form, { withCredentials: true });
+      await apiClient.post("/auth/login", form);
       navigate("/dashboard");
     } catch (error) {
       const data = error?.response?.data || {};
-      if (data.errors && typeof data.errors === 'object') {
+      if (data.errors && typeof data.errors === 'object' && Object.keys(data.errors).length>0) {
         setFieldErrors(data.errors)
       } else {
         const newFieldError = {};

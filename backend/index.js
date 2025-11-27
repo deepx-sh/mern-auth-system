@@ -40,10 +40,26 @@ app.get("/", (req, res) => {
 // Auth Api Endpoint
 
 import authRouter from "./routes/auth.routes.js";
+import { ApiError } from "./utils/ApiError.js";
 
 app.use("/api/auth", authRouter);
 
 app.use("/api/user", userRouter);
+
+app.use((err, req, res, next) => {
+  if (err instanceof ApiError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+      errors:err.errors || []
+    })
+  }
+
+  return res.status(500).json({
+    success: false,
+    message:err.message || "Internal Server Error"
+  })
+})
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
