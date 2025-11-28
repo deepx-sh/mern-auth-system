@@ -101,7 +101,7 @@ export const login = asyncHandler(async (req, res) => {
      // Access Token Generation
     const token = await generateAccessTokens(user._id);
 
-    const loggedInUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -isVerified -resetOtp -resetOtpExpireAt");
+    const loggedInUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt  -resetOtp -resetOtpExpireAt");
 
     // Cookie Config
     const options = {
