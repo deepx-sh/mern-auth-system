@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isAuthenticated, login, logout, register, resetPassword, sendPasswordResetOtp, verifyEmailOtp, verifyResetPasswordOtp } from "../controllers/auth.controller.js";
+import { isAuthenticated, login, logout, register, resendVerifyOtp, resetPassword, sendPasswordResetOtp, verifyEmailOtp, verifyResetPasswordOtp } from "../controllers/auth.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
@@ -11,6 +11,8 @@ router.route("/login").post(login);
 router.route("/logout").post(verifyJWT, logout);
 
 router.route("/verify-otp").post(verifyEmailOtp)
+
+router.route("/resend-verify-otp").post(verifyJWT,resendVerifyOtp)
 
 router.route("/is-auth").post(verifyJWT, isAuthenticated)
 

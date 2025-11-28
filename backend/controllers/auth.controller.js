@@ -196,7 +196,29 @@ export const verifyEmailOtp = asyncHandler(async (req, res) => {
     return res.status(200).cookie("accessToken",token,options).json(new ApiResponse(200,loggedInUser,"Email Verified Successfully. Logged in"))
 });
 
+// Resend Verify OTP for email verification
 
+export const resendVerifyOtp = asyncHandler(async (req, res) => {
+    const { email } = req.body || {}
+    
+    if (!email || email.trim() === "") {
+        throw new ApiError(400,"Email is required")
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        throw new ApiError(404,"User not found")
+    }
+
+    if (user.isVerified) {
+        throw new ApiError(400,"Email is already verified")
+    }
+
+    await generateAndSendOtp(user, "verify");
+
+return res.status(200).json(new ApiResponse(200,{},"Verification OTP sent"))
+})
 // Check if user is authenticated or not
 
 export const isAuthenticated = asyncHandler(async (req, res) => {

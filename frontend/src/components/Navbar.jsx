@@ -3,29 +3,47 @@ import React, { useContext, useState } from 'react'
 import {ShieldCheck} from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
 import UserContext from '../context/UserContext';
+import apiClient from '../lib/apiClient';
+import { toast } from 'react-toastify';
 const Navbar = () => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   
-  const { isLoggedIn, setIsLoggedIn, userData, setUserData } = useContext(UserContext);
+  const { isLoggedIn, userData, setUserData } = useContext(UserContext);
 
   const userName = userData?.name || "";
   const userInit = userName ? userName.charAt(0).toUpperCase() : "?";
   const isVerified = userData?.isVerified;
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
+  const handleLogout = async () => {
+    try {
+      await apiClient.post("/auth/logout");
     setUserData(null);
-    navigate("/login")
+    toast.success("Logout successfully");
+    navigate("/")
+    } catch (error) {
+      toast.error("Logout Failed")
+    }
   }
 
-  const handleVerifyEmail = () => {
-    navigate("");
+  const handleVerifyEmail = async() => {
+    try {
+      await apiClient.post("/auth/resend-verify-otp", {
+        email:userData?.email
+      })
+
+      localStorage.setItem("pendingEmail", userData?.email);
+      toast.success("Verification code sent to your email");
+      navigate("/verify-email");
+    } catch (error) {
+      const msg = error?.response?.data?.data?.message || error?.response?.data?.data?.error || "Could not send verification email";
+      toast.error(msg)
+    }
   }
 
   const handleResetPassword = () => {
-    navigate();
+    navigate("/forgot-password");
   }
 
   return (

@@ -44,7 +44,7 @@ const VerifyEmailOtp = () => {
       toast.success(data.message || "Email verified successfully");
 
       if (data) {
-        setIsLoggedIn(true);
+        // setIsLoggedIn(true);
         setUserData(data);
       } else {
         setIsLoggedIn(true)

@@ -6,6 +6,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import PrimaryButton from '../../components/ui/PrimaryButton';
 import apiClient from '../../lib/apiClient';
 import UserContext from '../../context/UserContext';
+import { toast } from 'react-toastify';
 const Login = () => {
   const navigate = useNavigate();
 
@@ -14,7 +15,7 @@ const Login = () => {
   const [formError, setFormError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const {setIsLoggedIn, setUserData}=useContext(UserContext)
+  const { setUserData}=useContext(UserContext)
 
 
   const handleChange = (e) => {
@@ -43,8 +44,10 @@ const Login = () => {
       const res = await apiClient.post("/auth/login", form);
       const data = res.data.data || {}
       
-      setIsLoggedIn(true);
+      // setIsLoggedIn(true);
+      toast.success(data.message)
       setUserData(data)
+      
       navigate("/dashboard");
     } catch (error) {
       const data = error?.response?.data || {};
