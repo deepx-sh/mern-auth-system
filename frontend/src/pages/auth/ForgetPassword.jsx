@@ -29,14 +29,14 @@ const ForgetPassword = () => {
 
     setLoading(true)
     try {
-      await apiClient.post("/auth/forget-password", { email });
-
+      const res=await apiClient.post("/auth/forget-password", { email });
+      
       localStorage.setItem("resetEmail", email);
-      toast.success("OTP sent to your email");
+      toast.success(res?.data?.message ||"OTP sent to your email");
       navigate("/verify-reset-otp", { state: { email } });
 
     } catch (error) {
-      const msg = error?.response?.data?.data?.message || error?.response?.data?.data?.error || "Failed to send reset OTP";
+      const msg = error?.response?.data?.message || error?.response?.data?.error || "Failed to send reset OTP";
       toast.error(msg);
     } finally {
       setLoading(false)

@@ -1,9 +1,12 @@
 import { CheckCheck } from 'lucide-react';
-import React from 'react'
+import React, { useContext } from 'react'
 import { Link } from 'react-router-dom';
 import FeatureCard from '../components/FeatureCard';
+import UserContext from '../context/UserContext';
 
 const LandingPage = () => {
+
+    const { isLoggedIn } = useContext(UserContext);
   return (
       <div className='min-h-screen bg-[#F5F4F1] text-[#0D0D0D]'>
           
@@ -23,7 +26,14 @@ const LandingPage = () => {
                               Emails OTPs, password reset flows, token-based  sessions built with security-first defaults.
                           </p>
 
-                          <div className='mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4'>
+                          {isLoggedIn ? (
+                               <div className='mt-8'>
+                                       <Link to="/dashboard" className='inline-flex items-center justify-center rounded-full bg-[#FF6B00] px-5 py-2.5 text-sm font-medium text-[#F8F8F8] hover:bg-[#E65A00] transition-colors text-shadow-sm'>
+                                Dashboard
+                              </Link>
+                                  </div>
+                          ) : (
+                             <div className='mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4'>
                               <Link to="/register" className='inline-flex items-center justify-center rounded-full bg-[#FF6B00] px-5 py-2.5 text-sm font-medium text-[#F8F8F8] hover:bg-[#E65A00] transition-colors text-shadow-sm'>
                                 Get started
                               </Link>
@@ -31,7 +41,8 @@ const LandingPage = () => {
                               <Link to="/login" className='inline-flex items-center justify-center rounded-md  border border-[#333333] px-4 py-2 text-sm text-[#0D0D0D] bg-white hover:bg-[#F0F0F0] transitions-colors'>
                                 Sign in
                               </Link>
-                          </div>
+                          </div>    
+                          )}
                           <div className='mt-6 flex items-center gap-2.5 text-sm text-[#6B6B6B]'>
                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E65A00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-circle-check-icon lucide-circle-check"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
                               <span>Trusted by developers easy integration, strong defaults</span>

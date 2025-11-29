@@ -17,6 +17,8 @@ const VerifyEmailOtp = () => {
 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
 
   useEffect(() => {
     if (!emailFormState) {
@@ -24,7 +26,11 @@ const VerifyEmailOtp = () => {
     }
   }, [emailFormState, navigate]);
 
-
+  useEffect(() => {
+    if (!resendTimer) return;
+    const id = setTimeout(() => setResendTimer((t) => t - 1), 1000);
+    return () => clearTimeout(id);
+  },[resendTimer])
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -60,6 +66,23 @@ const VerifyEmailOtp = () => {
       setLoading(false)
     }
   }
+
+  const handleResend = async  () => {
+    if (!emailFormState) return;
+
+    setResendLoading(true);
+
+    try {
+      await apiClient.post("/auth/resend-verify-otp", { email: emailFormState });
+      toast.success("New OTP sent to your email");
+      setResendTimer(60);
+    } catch (error) {
+      const msg = error?.response?.data?.message || error?.response?.data?.error || "Could not resend OTP";
+      toast.error(msg);
+    } finally {
+      setResendLoading(false);
+    }
+  }
   return (
     <main className='min-h-screen flex items-center justify-center bg-[#F5F4F1] P-6'>
       <div className='w-full max-w-md'>
@@ -79,7 +102,12 @@ const VerifyEmailOtp = () => {
             <p className='mt-1 text-xs text-[#6B6B6B]'>Code expires in 5 minutes. Check span if you can't find the email.</p>
           </div>
           
-        <PrimaryButton type='submit' loading={loading} className='w-full'>Verify email</PrimaryButton>
+          <PrimaryButton type='submit' loading={loading} className='w-full'>Verify email</PrimaryButton>
+          
+          <div className='flex items-center justify-between text-sm text-[#6B6B6B]'>
+            <span>Didn't get the code?</span>
+            <button type='button' disabled={resendLoading || resendTimer > 0} onClick={handleResend} className={`text-[#0D0D0D] font-medium underline disabled:opacity-60 disabled:cursor-not-allowed`}>{ resendTimer>0 ? `Resend in ${resendTimer}s`:resendLoading?"Sending...":"Resend OTP"}</button>
+          </div>
         </form>
       </div>
     </main>

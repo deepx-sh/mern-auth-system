@@ -10,7 +10,9 @@ const VerifyResetOtp = () => {
     const emailFromState = location.state?.email || localStorage.getItem("resetEmail");
 
     const [otp, setOtp] = useState("");
-    const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+    const [resendTimer, setResendTimer] = useState(0);
     
 
   useEffect(() => {
@@ -18,6 +20,12 @@ const VerifyResetOtp = () => {
       navigate("/forgot-password");
     }
   }, [emailFromState, navigate]);
+
+  useEffect(() => {
+      if (!resendTimer) return;
+      const id = setTimeout(() => setResendTimer((t) => t - 1), 1000);
+      return () => clearTimeout(id);
+    },[resendTimer])
 
   const handleSubmit = async(e) => {
     e.preventDefault();
@@ -50,6 +58,23 @@ const VerifyResetOtp = () => {
       toast.error(msg);
     } finally {
       setLoading(false);
+    }
+  }
+
+  const handleResend = async  () => {
+    if (!emailFromState) return;
+
+    setResendLoading(true);
+
+    try {
+      await apiClient.post("/auth/forget-password", { email: emailFromState });
+      toast.success("New Code sent to your email");
+      setResendTimer(60);
+    } catch (error) {
+      const msg = error?.response?.data?.message || error?.response?.data?.error || "Could not resend OTP";
+      toast.error(msg);
+    } finally {
+      setResendLoading(false);
     }
   }
   return (
@@ -85,6 +110,11 @@ const VerifyResetOtp = () => {
           </div>
 
           <PrimaryButton type='submit' loading={loading} className='w-full'>Verify code</PrimaryButton>
+
+          <div className='flex items-center justify-between text-sm text-[#6B6B6B]'>
+            <span>Didn't get the code?</span>
+            <button type='button' disabled={resendLoading || resendTimer > 0} onClick={handleResend} className='text-[#0D0D0D] font-medium underline disabled:opacity-60 disabled:cursor-not-allowed'>{ resendTimer>0 ? `Resend in ${resendTimer}s`:resendLoading?"Sending...":"Resend code"}</button>
+          </div>
 
           <div className='text-center text-xs text-[#6B6B6B]'>
             <Link to="/forgot-password" className='underline'>

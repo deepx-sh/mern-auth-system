@@ -46,12 +46,16 @@ const Navbar = () => {
     navigate("/forgot-password");
   }
 
+  const handleLogoClick = () => {
+    sessionStorage.setItem("landingSeen", "1");
+    navigate("/")
+  }
   return (
     <header className='sticky top-0 z-30 w-full border-b border-white/10 bg-[#050505]/90 backdrop-blur'>
       <div className='mx-auto max-w-6xl px-4 sm:px-6 lg:px-8'>
         <div className='flex h-14 items-center justify-between'>
           {/* Header Logo */}
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-2' onClick={handleLogoClick}>
             <div className='flex h-8 w-8 items-center justify-center  overflow-hidden'>
               <ShieldCheck size={32} color="#FF6B00" />
             </div>

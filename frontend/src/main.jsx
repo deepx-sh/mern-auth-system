@@ -16,33 +16,48 @@ import ForgetPassword from "./pages/auth/ForgetPassword.jsx";
 import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
 import UserContextProvider from "./context/UserContextProvider.jsx";
-import {ToastContainer} from 'react-toastify'
+import { ToastContainer } from "react-toastify";
 import Dashboard from "./pages/Dashboard.jsx";
 import VerifyResetOtp from "./pages/auth/VerifyResetOtp.jsx";
+import { RedirectIfAuth, RequireAuth } from "./routes/guards.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
-      <Route path="" element={<Home />} />
+     <Route index element={<Home />} />
+      <Route element={<RedirectIfAuth />}>
+         
+         
+        <Route path="register" element={<Register />} />
+        <Route path="login" element={<Login />} />
+      </Route>
+      
       <Route path="verify-email" element={<VerifyEmailOtp />} />
-      <Route path="reset-password" element={<ResetPassword />} />
-      <Route path="forgot-password" element={<ForgetPassword />} />
-      <Route path="verify-reset-otp" element={<VerifyResetOtp/> } />
-      <Route path="register" element={ <Register/>} />
-      <Route path="login" element={<Login />} />
-      <Route path="dashboard" element={<Dashboard/>}/>
+        <Route path="reset-password" element={<ResetPassword />} />
+        <Route path="forgot-password" element={<ForgetPassword />} />
+        <Route path="verify-reset-otp" element={<VerifyResetOtp />} />
+      <Route element={<RequireAuth />}>
+        <Route path="dashboard" element={<Dashboard />} />
+      </Route>
+     
     </Route>
   )
 );
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-     <UserContextProvider>
-    <RouterProvider router={router}>
-     
+    <UserContextProvider>
+      <RouterProvider router={router}>
         <App />
-     
       </RouterProvider>
-       </UserContextProvider>
-    <ToastContainer position="top-right" autoClose={ 2500} hideProgressBar={false} newestOnTop closeOnClick pauseOnHover theme="dark" />
+    </UserContextProvider>
+    <ToastContainer
+      position="top-right"
+      autoClose={3000}
+      hideProgressBar={false}
+      newestOnTop
+      closeOnClick
+      pauseOnHover
+      theme="dark"
+    />
   </StrictMode>
 );
