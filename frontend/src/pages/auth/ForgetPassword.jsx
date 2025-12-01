@@ -48,7 +48,7 @@ const ForgetPassword = () => {
         <div className='mb-6 text-center'>
           <h1 className='text-2xl font-extrabold text-[#0D0D0D]'>Forgot your password?</h1>
 
-          <p className='mt-2 text-sm text-[#6B6B6B]'>Enter your email and we&apos; Send you a one-time code to reset your password</p>
+          <p className='mt-2 text-sm text-[#6B6B6B]'>Enter your email and we&apos;ll send you a one-time code to reset your password</p>
         </div>
 
         <form onSubmit={handleSubmit} className='bg-white rounded-2xl p-6 shadow-sm ring-1 ring-[#EDEDED] space-y-4'>

@@ -7,6 +7,7 @@ import {EyeOff,Eye} from 'lucide-react'
 import TextInput from '../../components/ui/TextInput'
 import PrimaryButton from '../../components/ui/PrimaryButton'
 import apiClient from '../../lib/apiClient';
+import { toast } from 'react-toastify';
 const Register = () => {
   const navigate = useNavigate();
 
@@ -48,10 +49,12 @@ const Register = () => {
       localStorage.setItem("pendingEmail", form.email);
       navigate("/verify-email", { state: { email: form.email } });
     } catch (error) {
-      console.log(error);
+   
       
       const data = error?.response?.data || {};
-
+      toast.error(data.message)
+      
+      
       if (data.errors && typeof data.errors === "object" && Object.keys(data.errors).length>0) {
         setFieldErrors(data.errors);
       } else {
@@ -65,6 +68,7 @@ const Register = () => {
         } else {
           setFormError(data.message || data.error || error.message || "Registration failed")
         }
+        
       }
     } finally {
       setLoading(false);

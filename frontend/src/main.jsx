@@ -9,7 +9,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import Home from "./pages/Home.jsx";
-import Layout from "./layout.jsx";
+import Layout from "./Layout.jsx";
 import VerifyEmailOtp from "./pages/auth/VerifyEmailOtp.jsx";
 import ResetPassword from "./pages/auth/ResetPassword.jsx";
 import ForgetPassword from "./pages/auth/ForgetPassword.jsx";

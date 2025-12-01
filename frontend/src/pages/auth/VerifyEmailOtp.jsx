@@ -88,7 +88,7 @@ const VerifyEmailOtp = () => {
       <div className='w-full max-w-md'>
         <div className='mb-6 text-center'>
           <h1 className='text-2xl font-extrabold text-[#0D0D0D]'>Verify your email</h1>
-          <p className='mt-2 text-sm text-[#6B6B6B]'>We've sent a 6-digit verification code to {" "} <span className='font-semibold text-[#0D0D0D]'>{emailFormState || "your email" }</span>Enter it below to activate your account.</p>
+          <p className='mt-2 text-sm text-[#6B6B6B]'>We've sent a 6-digit verification code to {" "} <span className='font-semibold text-[#0D0D0D]'>{emailFormState || "your email"}</span>{ " "}Enter it below to activate your account.</p>
         </div>
 
         <form onSubmit={handleSubmit} className='bg-white rounded-2xl p-6 shadow-sm ring-1 ring-[#EDEDED] space-y-4'>

@@ -41,14 +41,17 @@ const VerifyResetOtp = () => {
       const res = await apiClient.post("/auth/verify-reset-otp",{email:emailFromState,otp});
 
       const data = res.data.data || {};
+      console.log(data);
+      
       const resetToken = data.resetToken;
-
+      
       if (!resetToken) {
         toast.error("No reset token received from server");
         return;
       }
 
       localStorage.setItem("resetToken", resetToken);
+      localStorage.setItem("resetEmail",emailFromState)
       toast.success(data.message || "OTP verified. You can reset your password now");
       navigate("/reset-password", { state: { email: emailFromState } });
     } catch (error) {
