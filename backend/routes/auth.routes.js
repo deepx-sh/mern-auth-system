@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isAuthenticated, login, logout, register, resendVerifyOtp, resetPassword, sendPasswordResetOtp, verifyEmailOtp, verifyResetPasswordOtp } from "../controllers/auth.controller.js";
+import { isAuthenticated, login, logout, refreshAccessToken, register, resendVerifyOtp, resetPassword, sendPasswordResetOtp, verifyEmailOtp, verifyResetPasswordOtp } from "../controllers/auth.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { validateEmailDomain } from "../middlewares/emailDomain.middleware.js";
 import { validateRegister } from "../middlewares/validateRegister.middleware.js";
@@ -28,5 +28,7 @@ router.route("/forget-password").post(validateForgotPassword,validateEmailDomain
 
 router.route("/verify-reset-otp").post(validateVerifyResetOtp,verifyResetPasswordOtp)
 
-router.route("/reset-password").post(validateResetPassword,resetPassword)
+router.route("/reset-password").post(validateResetPassword, resetPassword)
+
+router.route("/refresh-token").post(refreshAccessToken)
 export default router
