@@ -8,17 +8,30 @@ import { sendWelcomeEmail } from "./email.controller.js";
 import { generateAndSendOtp } from "../utils/generateSendOtp.js";
 import jwt from 'jsonwebtoken'
 
-const generateAccessTokens = async (userId) => {
+
+const generateAccessTokensAndRefreshTokens = async (userId) => {
     
     try {
         const user = await User.findById(userId);
         const accessToken = user.generateAccessToken();
-        return accessToken;
+        const refreshToken = user.generateRefreshToken();
+
+        user.refreshToken = refreshToken;
+        await user.save({validateBeforeSave:false})
+        return { accessToken ,refreshToken};
     } catch (error) {
         throw new ApiError(500,"Something went wrong while generating access token")
     }
 }
 
+
+// Helper function for cookie options
+const getCookieOptions = (maxAge) => ({
+     httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+        maxAge,
+})
 export const register = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body || {};
 
@@ -46,7 +59,7 @@ export const register = asyncHandler(async (req, res) => {
         password
     })
 
-    const createdUser=await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -isVerified -resetOtp -resetOtpExpireAt")
+    const createdUser=await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -isVerified -resetOtp -resetOtpExpireAt -refreshToken")
 
 
     if (!createdUser) {
@@ -99,32 +112,45 @@ export const login = asyncHandler(async (req, res) => {
     }
 
      // Access Token Generation
-    const token = await generateAccessTokens(user._id);
+    const {accessToken,refreshToken} = await generateAccessTokensAndRefreshTokens(user._id);
 
-    const loggedInUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt  -resetOtp -resetOtpExpireAt");
+    const loggedInUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt  -resetOtp -resetOtpExpireAt -refreshToken");
 
     // Cookie Config
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-        maxAge:7*24*60*60*1000,
-    }
-    return res.status(201).cookie("accessToken", token, options).json(new ApiResponse(200, loggedInUser, "User logged in successfully!"));
+    // const options = {
+    //     httpOnly: true,
+    //     secure: process.env.NODE_ENV === 'production',
+    //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+    //     maxAge:7*24*60*60*1000,
+    // }
+    return res.status(200).cookie("accessToken", accessToken, getCookieOptions(15*60*1000)).cookie("refreshToken",refreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200, loggedInUser, "User logged in successfully!"));
 
 });
 
 
 export const logout = asyncHandler(async (req, res) => {
     // Cookie Config
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-        maxAge:7*24*60*60*1000,
-    }
+    // const options = {
+    //     httpOnly: true,
+    //     secure: process.env.NODE_ENV === 'production',
+    //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+    //     maxAge:7*24*60*60*1000,
+    // }
+    const userId = req.user?.id;
+    if (userId) {
+        await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                refreshToken:""
+            }
+        },
+        {new:true}
+    )
+   }
 
-    return res.status(200).clearCookie("accessToken",options).json(new ApiResponse(200,{},"User logout successfully"))
+    const options=getCookieOptions(0)
+    return res.status(200).clearCookie("accessToken",options).clearCookie("refreshToken",options).json(new ApiResponse(200,{},"User logout successfully"))
 });
 
 
@@ -182,18 +208,18 @@ export const verifyEmailOtp = asyncHandler(async (req, res) => {
         
     }
 
-    const token = await generateAccessTokens(user._id)
+    const {accessToken,refreshToken} = await generateAccessTokensAndRefreshTokens(user._id)
     
-    const loggedInUser=await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt")
+    const loggedInUser=await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt -refreshToken")
     // Cookie Config
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-        maxAge:7*24*60*60*1000,
-    }
+    // const options = {
+    //     httpOnly: true,
+    //     secure: process.env.NODE_ENV === 'production',
+    //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+    //     maxAge:7*24*60*60*1000,
+    // }
 
-    return res.status(200).cookie("accessToken",token,options).json(new ApiResponse(200,loggedInUser,"Email Verified Successfully. Logged in"))
+    return res.status(200).cookie("accessToken",accessToken,getCookieOptions(15*60*1000)).cookie("refreshToken",refreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200,loggedInUser,"Email Verified Successfully. Logged in"))
 });
 
 // Resend Verify OTP for email verification
@@ -249,7 +275,7 @@ export const sendPasswordResetOtp = asyncHandler(async (req, res) => {
         throw new ApiError(400,"Please verify your email before resetting password")
     }
 
-    const existUser=await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt")
+    const existUser=await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt -refreshToken")
     // Generate reset otp and send to registered email
     await generateAndSendOtp(existUser, "resetPassword");
 
@@ -339,4 +365,63 @@ export const resetPassword = asyncHandler(async (req, res) => {
     await user.save();
 
     return res.status(200).json(new ApiResponse(200,{},"Password reset successfully"))
+});
+
+
+// RefreshToken
+
+export const refreshAccessToken = asyncHandler(async (req, res) => {
+    const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+   
+    
+    if (!incomingRefreshToken) {
+        throw new ApiError(401,"Refresh token is required")
+    }
+
+    try {
+        const decodedInfo = jwt.verify(incomingRefreshToken, process.env.JWT_REFRESH_TOKEN_SECRET);
+
+        const user = await User.findById(decodedInfo._id);
+
+        if (!user) {
+            throw new ApiError(401,"Invalid refresh token")
+        }
+
+        if (incomingRefreshToken !== user?.refreshToken) {
+            throw new ApiError(401,"Refresh token is used or expired")
+        }
+
+        const { accessToken, refreshToken: newRefreshToken } = await generateAccessTokensAndRefreshTokens(user._id);
+
+        return res.status(200).cookie("accessToken",accessToken,getCookieOptions(15*60*1000)).cookie("refreshToken",newRefreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200,{accessToken,refreshToken:newRefreshToken},"Access Token refreshed successfully"))
+    } catch (error) {
+        if (error.name === "TokenExpiredError" || error.name === "JsonWebTokenError") {
+            try {
+                const decodedInfo = jwt.decode(incomingRefreshToken);
+                if (decodedInfo._id) {
+                    await User.findByIdAndUpdate(decodedInfo?._id, {
+                        $set:{refreshToken:""}
+                    })
+                }
+            } catch (cleanupError) {
+                console.error("failed to clear expired refresh token",cleanupError);
+                
+            }
+        }
+        if (error.name === "TokenExpiredError") {
+            const clearOptions = getCookieOptions(0);
+            res.clearCookie("accessToken", clearOptions);
+            res.clearCookie("refreshToken",clearOptions)
+            throw new ApiError(401,"Session expired. Please login again")
+        }
+
+        if (error.name === "JsonWebTokenError") {
+            throw new ApiError(401,"Invalid refresh token")
+        }
+
+        if (error instanceof ApiError) {
+            throw error
+        }
+        throw new ApiError(401,"Invalid refresh token")
+    }
 })

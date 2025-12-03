@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    refreshToken: {
+      type: String,
+      default:""
+    }
   },
   { timestamps: true }
 );
@@ -67,10 +71,24 @@ userSchema.methods.generateAccessToken = function () {
     },
     process.env.JWT_ACCESS_TOKEN_SECRET,
     {
-      expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRE,
+      expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRE || "15m",
     }
   );
 };
+
+
+// Generate Refresh Token
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
+    {
+      _id:this._id
+    },
+    process.env.JWT_REFRESH_TOKEN_SECRET,
+    {
+      expiresIn:process.env.JWT_REFRESH_TOKEN_EXPIRE || "7d"
+    }
+  )
+}
 export const User = mongoose.model.User || mongoose.model("User", userSchema);
 
 // export default User

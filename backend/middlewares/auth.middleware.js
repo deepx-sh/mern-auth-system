@@ -7,19 +7,27 @@ import jwt from "jsonwebtoken";
 export const verifyJWT = asyncHandler(async (req, res, next) => {
    
     
-    const token = req.cookies?.accessToken || req.headers["authorization"]?.replace("Bearer", "");
+    const token = req.cookies?.accessToken || req.headers["authorization"]?.replace("Bearer ", "");
 
     if (!token) {
         throw new ApiError(401,"Unauthorized access")
     }
 
-    const decodedInfo = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
+    try {
+        const decodedInfo = jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
 
-    const user = await User.findById(decodedInfo?._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt");
-
+        const user = await User.findById(decodedInfo?._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt -refreshToken");
+        
     if (!user) {
         throw new ApiError(401,"Invalid access token")
     }
     req.user = user;
     next();
+    } catch (error) {
+        
+        if (error.name === "TokenExpiredError") {
+            throw new ApiError(401,"Access token expired")
+        }
+        throw new ApiError(401,"Invalid access")
+    }
 })

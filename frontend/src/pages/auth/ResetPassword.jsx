@@ -1,44 +1,52 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import apiClient from '../../lib/apiClient';
 import TextInput from '../../components/ui/TextInput';
 import { Eye, EyeOff } from 'lucide-react'
 import PrimaryButton from '../../components/ui/PrimaryButton';
+import UserContext from '../../context/UserContext';
 const ResetPassword = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
 
   const emailFormState = location.state?.email || localStorage.getItem("resetEmail");
-  const storedToken = localStorage.getItem("resetToken");
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
   const [showConfim, setShowConfim] = useState(false);
+  const {setUserData}=useContext(UserContext)
 
   useEffect(() => {
+      const storedToken = localStorage.getItem("resetToken");
     if (!storedToken) {
+      toast.error("Reset token missing. Please request a new password reset")
       navigate("/forgot-password")
     }
-  }, [storedToken, navigate])
+  }, [navigate])
   
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const passwordRegex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()]).{8,32}$/;
 
     if (!password.trim() || !confirm.trim()) {
       toast.error("Password and confirm password are required");
       return;
     }
 
+    if (!passwordRegex.test(password)) {
+      toast.error("Password requires at least one digit, one lowercase letter, one uppercase letter, one special character, and a length between 8 and 32 characters.");
+      return
+    }
     if (password.length < 8) {
       toast.error("Password must be at least 8 characters");
       return;
     }
 
-    if (password != confirm) {
+    if (password !== confirm) {
       toast.error("Password do not match");
       return;
     }
@@ -46,6 +54,12 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
+        const storedToken = localStorage.getItem("resetToken");
+      if (!storedToken) {
+      toast.error("Reset session expired. Please request a new password reset")
+        navigate("/forgot-password")
+        return
+    }
       await apiClient.post("/auth/reset-password", {
         resetToken: storedToken,
         newPassword:password
@@ -53,12 +67,18 @@ const ResetPassword = () => {
 
       localStorage.removeItem("resetToken");
       localStorage.removeItem("resetEmail");
-
+      setUserData(null)
       toast.success("Password reset successfully. You can now log in.")
       navigate("/login");
     } catch (error) {
       const msg = error?.response?.data?.message || error?.response?.data?.error || "Failed to reset password";
       toast.error(msg);
+
+      if (error?.response?.status === 400 || error?.response?.status === 401) {
+        localStorage.removeItem("resetToken");
+        localStorage.removeItem("resetEmail");
+        setTimeout(()=> navigate("/forgot-password"),2000)
+      }
     } finally {
       setLoading(false);
     }

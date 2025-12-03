@@ -130,7 +130,7 @@ const Navbar = () => {
       </div>
 
       <div className={`sm:hidden border-t  border-white/10 bg-[#050505]/95 transition-all duration-200 ease-out ${mobileOpen? "max-h-32 opacity-100": "max-h-0 opacity-0"} overflow-hidden`}>
-        <div className='mx-auto max-w-6xl px-4 py-3 space-y2'>
+        <div className='mx-auto max-w-6xl px-4 py-3 space-y-1'>
           {!isLoggedIn ? (
             <>
               <button type='button' onClick={()=> navigate('/login')} className='w-full text-left text-sm text-[#C9C9C9] hover:text-[#F8F8F8] px-3 py-2 rounded-md hover:bg-[#111111] transition-colors'>Login</button>
