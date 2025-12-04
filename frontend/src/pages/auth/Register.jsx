@@ -44,8 +44,8 @@ const Register = () => {
     setFieldErrors({});
 
     try {
-      await apiClient.post("/auth/register", form);
-
+      const response=await apiClient.post("/auth/register", form);
+      toast.success(response?.data?.message)
       localStorage.setItem("pendingEmail", form.email);
       navigate("/verify-email", { state: { email: form.email } });
     } catch (error) {

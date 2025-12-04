@@ -59,7 +59,7 @@ export const register = asyncHandler(async (req, res) => {
         password
     })
 
-    const createdUser=await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -isVerified -resetOtp -resetOtpExpireAt -refreshToken")
+    const createdUser=await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt -refreshToken")
 
 
     if (!createdUser) {
@@ -81,9 +81,11 @@ export const register = asyncHandler(async (req, res) => {
     // await sendWelcomeEmail(createdUser);
 
     // Send Verification OTP
-    await generateAndSendOtp(createdUser,"verify")
+    await generateAndSendOtp(createdUser, "verify")
+    
+    const newCreatedUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt -refreshToken");
     // return res.status(201).cookie("accessToken", token, options).json(new ApiResponse(200, createdUser, "User registration successfully!"));
-    return res.status(201).json(new ApiResponse(200,createdUser,"User registered successfully. OTP sent to you email"))
+    return res.status(201).json(new ApiResponse(200,newCreatedUser,"User registered successfully. OTP sent to you email"))
 
 })
 
