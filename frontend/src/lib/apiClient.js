@@ -29,7 +29,7 @@ const handleSessionExpiry = () => {
     localStorage.removeItem("resetToken")
     const currPath = window.location.pathname;
 
-    const publicPaths = ["/login", "/register", "/forgot-password", "/verify-email", "/verify-reset-otp", "reset-password"];
+    const publicPaths = ["/login", "/register", "/forgot-password", "/verify-email", "/verify-reset-otp", "/reset-password","/"];
 
     if (!publicPaths.includes(currPath)) {
         toast.error("Your session has expired. Please login again",{toastId:'session-expired'})
@@ -39,6 +39,8 @@ const handleSessionExpiry = () => {
                         window.location.href="/login"
                     },1000)
 }
+
+const NO_REFRESH_ENDPOINTS=["/auth/login","/auth/register","/auth/verify-otp","/auth/forget-password","/auth/verify-reset-otp","/auth/reset-password","/auth/refresh-token","/auth/resend-verify-otp"]
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -49,8 +51,15 @@ apiClient.interceptors.response.use(
         // if (originalReq.url.includes("/auth/refresh-token")) {
         //     return Promise.reject(error)
         // }
-        
-        if (error.response?.status === 401 && !originalReq._retry && !originalReq.url?.includes('/auth/refresh-token')) {
+        const shouldSkipRefresh = NO_REFRESH_ENDPOINTS.some(endpoint => originalReq.url?.includes(endpoint));
+        if (error.response?.status === 401 && !originalReq._retry && !shouldSkipRefresh) {
+
+            const errorMessage = error.response?.data?.message || "";
+            const isTokenExpiry = errorMessage.includes("token expired") || errorMessage.includes("Access token expired") || errorMessage.includes("Unauthorized access") || errorMessage.includes("Invalid access token");
+
+            if (!isTokenExpiry) {
+                return Promise.reject(error)
+            }
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {
                     failedQueue.push({resolve,reject})
@@ -69,7 +78,7 @@ apiClient.interceptors.response.use(
             try {
                 console.log("Im");
                 
-                const response=await apiClient.post("/auth/refresh-token")
+                await apiClient.post("/auth/refresh-token")
                 processQueue(null)
                 isRefreshing = false
                 return apiClient(originalReq)
