@@ -18,7 +18,7 @@ export const validateVerifyResetOtp = asyncHandler(async (req, res, next) => {
     }
 
     if (!emailRegex.test(trimmedEmail)) {
-        throw new ApiError("Enter a valid email");
+        throw new ApiError(400,"Enter a valid email");
     }
 
     if (!/^\d{6}$/.test(trimmedOtp)) {
