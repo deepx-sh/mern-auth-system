@@ -14,7 +14,7 @@ export const validateLogin = asyncHandler(async (req, res,next) => {
     const trimmedPassword = password.trim();
 
     if (!trimmedEmail || !trimmedPassword) {
-        throw new Error(400,"Email and password are required");
+        throw new ApiError(400,"Email and password are required");
         
     }
 
