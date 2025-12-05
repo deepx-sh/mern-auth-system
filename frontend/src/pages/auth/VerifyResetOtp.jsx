@@ -52,12 +52,12 @@ const VerifyResetOtp = () => {
 
       localStorage.setItem("resetToken", resetToken);
       localStorage.setItem("resetEmail",emailFromState)
-      toast.success(data.message || "OTP verified. You can reset your password now");
+      toast.success(res.data.message || "OTP verified. You can reset your password now");
       navigate("/reset-password", { state: { email: emailFromState } });
     } catch (error) {
       console.log(error);
       
-      const msg = error?.response?.data?.message || error?.response?.data?.data?.error || "Invalid or expired code"
+      const msg = error?.response?.data?.message || error?.response?.data?.error || "Invalid or expired code"
       toast.error(msg);
     } finally {
       setLoading(false);

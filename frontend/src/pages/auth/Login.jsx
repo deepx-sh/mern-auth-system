@@ -45,7 +45,7 @@ const Login = () => {
       const data = res.data.data || {}
       
       // setIsLoggedIn(true);
-      toast.success(data.message)
+      toast.success(res.data.message)
       setUserData(data)
       
       navigate("/dashboard");
@@ -61,6 +61,7 @@ const Login = () => {
         if (Object.keys(newFieldError).length) {
           setFieldErrors(newFieldError);
         } else {
+          toast.error(data.message)
           setFormError(data.message || data.error || error.message || "Login failed");
         }
       }

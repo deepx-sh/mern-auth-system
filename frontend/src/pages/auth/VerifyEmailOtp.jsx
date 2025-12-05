@@ -47,7 +47,7 @@ const VerifyEmailOtp = () => {
       const data = res.data.data || {};
       console.log(data);
       
-      toast.success(data.message || "Email verified successfully");
+      toast.success(res.data.message || "Email verified successfully");
 
       if (data) {
         // setIsLoggedIn(true);

@@ -37,7 +37,7 @@ const Navbar = () => {
       toast.success("Verification code sent to your email");
       navigate("/verify-email");
     } catch (error) {
-      const msg = error?.response?.data?.data?.message || error?.response?.data?.data?.error || "Could not send verification email";
+      const msg = error?.response?.data?.message || error?.response?.data?.error || "Could not send verification email";
       toast.error(msg)
     }
   }
