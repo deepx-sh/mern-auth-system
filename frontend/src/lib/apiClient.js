@@ -44,6 +44,21 @@ const NO_REFRESH_ENDPOINTS=["/auth/login","/auth/register","/auth/verify-otp","/
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
+
+        // Handle Rate limit error
+        if (error.response?.status === 429) {
+            const errorData = error.response.data;
+            const retryAfter = errorData.retryAfter;
+
+            if (retryAfter) {
+                const minutes = Math.ceil(retryAfter / 60);
+                toast.error(`${errorData.message}. Try again in ${minutes} minutes`),{autoClose:5000}
+            } else {
+                toast.error(errorData.message || "Too many requests. Please try again later")
+            }
+
+            return Promise.reject(error)
+        }
         const originalReq = error.config;
         console.log(error);
         console.log(originalReq);

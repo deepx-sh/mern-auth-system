@@ -8,27 +8,28 @@ import { validateVerifyEmailOtp } from "../middlewares/validateVerifyEmailOtp.js
 import { validateForgotPassword } from "../middlewares/validateForgotPassword.js";
 import { validateVerifyResetOtp } from "../middlewares/validateVerifyResetOtp.js";
 import { validateResetPassword } from "../middlewares/validateResetPassword.js";
+import { loginLimiter, otpLimiter, otpVerifyLimiter, passwordResetLimiter, registerLimiter } from "../middlewares/rateLimiter.middleware.js";
 
 const router = Router();
 
-router.route("/register").post(validateRegister,validateEmailDomain,register);
+router.route("/register").post(registerLimiter,validateRegister,validateEmailDomain,register);
 
-router.route("/login").post(validateLogin,login);
+router.route("/login").post(loginLimiter,validateLogin,login);
 
 router.route("/logout").post(verifyJWT, logout);
 
-router.route("/verify-otp").post(validateVerifyEmailOtp,verifyEmailOtp)
+router.route("/verify-otp").post(otpVerifyLimiter,validateVerifyEmailOtp,verifyEmailOtp)
 
-router.route("/resend-verify-otp").post(resendVerifyOtp)
+router.route("/resend-verify-otp").post(otpLimiter,resendVerifyOtp)
 
 router.route("/is-auth").post(verifyJWT, isAuthenticated)
 
 
-router.route("/forget-password").post(validateForgotPassword,validateEmailDomain,sendPasswordResetOtp)
+router.route("/forget-password").post(passwordResetLimiter,validateForgotPassword,validateEmailDomain,sendPasswordResetOtp)
 
-router.route("/verify-reset-otp").post(validateVerifyResetOtp,verifyResetPasswordOtp)
+router.route("/verify-reset-otp").post(otpVerifyLimiter,validateVerifyResetOtp,verifyResetPasswordOtp)
 
-router.route("/reset-password").post(validateResetPassword, resetPassword)
+router.route("/reset-password").post(passwordResetLimiter,validateResetPassword, resetPassword)
 
 router.route("/refresh-token").post(refreshAccessToken)
 export default router

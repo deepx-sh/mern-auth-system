@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 4000;
 // Database Connection
 connectDB();
 
+app.set('trust proxy',1)
 app.use(express.json());
 app.use(cookieParser());
 
@@ -33,6 +34,8 @@ app.use(
   })
 );
 
+app.use(globalLimiter);
+app.use(apiSpeedLimiter)
 app.get("/", (req, res) => {
   return res.send("<h1>Home Page</h1>");
 });
@@ -41,6 +44,7 @@ app.get("/", (req, res) => {
 
 import authRouter from "./routes/auth.routes.js";
 import { ApiError } from "./utils/ApiError.js";
+import { apiSpeedLimiter, globalLimiter } from "./middlewares/rateLimiter.middleware.js";
 
 app.use("/api/auth", authRouter);
 
