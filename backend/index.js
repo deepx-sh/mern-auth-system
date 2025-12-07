@@ -1,3 +1,11 @@
+const requireEnvVars = ['MONGODB_URI', 'JWT_ACCESS_TOKEN_SECRET', 'JWT_ACCESS_TOKEN_EXPIRE', 'JWT_REFRESH_TOKEN_SECRET', 'JWT_REFRESH_TOKEN_EXPIRE', 'JWT_RESET_PASSWORD_SECRET', 'JWT_RESET_PASSWORD_EXPIRE', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS']
+
+requireEnvVars.forEach((varName) => {
+  if (!process.env[varName]) {
+    console.error("ENVIRONMENT VARIABLE MISSING");
+    process.exit(1);
+  }
+})
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
