@@ -8,6 +8,7 @@ import TextInput from '../../components/ui/TextInput'
 import PrimaryButton from '../../components/ui/PrimaryButton'
 import apiClient from '../../lib/apiClient';
 import { toast } from 'react-toastify';
+import PasswordStrengthMeter from '../../components/PasswordStrengthMeter';
 const Register = () => {
   const navigate = useNavigate();
 
@@ -101,8 +102,10 @@ const Register = () => {
           
           <TextInput label="Email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@example.com" required error={fieldErrors.email} autoComplete="email" />
           
-          <TextInput label="Password" name="password" type={showPassword? "text": "password"} value={form.password} rightElement={<button type='button' onClick={() => setShowPassword((prev) => !prev)} className='text-xs text-[#6B6B6B] px-2 py-1 rounded'>{ showPassword ? <EyeOff />:<Eye />}</button>} onChange={handleChange} placeholder="At least 8 characters" required error={fieldErrors.password} autoComplete="new-password"/>
-        
+          <div>
+                      <TextInput label="Password" name="password" type={showPassword? "text": "password"} value={form.password} rightElement={<button type='button' onClick={() => setShowPassword((prev) => !prev)} className='text-xs text-[#6B6B6B] px-2 py-1 rounded'>{ showPassword ? <EyeOff />:<Eye />}</button>} onChange={handleChange} placeholder="At least 8 characters" required error={fieldErrors.password} autoComplete="new-password"/>
+                      {form.password && <PasswordStrengthMeter password={form.password}/>}
+          </div>
         
           <PrimaryButton type='submit' loading={loading} className='w-full' >Create account</PrimaryButton>
        

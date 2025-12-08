@@ -6,6 +6,7 @@ import TextInput from '../../components/ui/TextInput';
 import { Eye, EyeOff } from 'lucide-react'
 import PrimaryButton from '../../components/ui/PrimaryButton';
 import UserContext from '../../context/UserContext';
+import PasswordStrengthMeter from '../../components/PasswordStrengthMeter';
 const ResetPassword = () => {
 
   const location = useLocation();
@@ -93,8 +94,10 @@ const ResetPassword = () => {
         </div>
 
         <form onSubmit={handleSubmit} className='bg-white rounded-2xl p-6 shadow-sm ring-1 ring-[#EDEDED] space-y-4'>
-          <TextInput label="New password" name="password" type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" required rightElement={<button type='button' onClick={() => setShowPw((s) => !s)} className='text-xs text-[#6B6B6B] px-2 py-1'>{showPw ? <EyeOff /> : <Eye />}</button>} autoComplete="new-password" />
-          
+          <div>
+                      <TextInput label="New password" name="password" type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" required rightElement={<button type='button' onClick={() => setShowPw((s) => !s)} className='text-xs text-[#6B6B6B] px-2 py-1'>{showPw ? <EyeOff /> : <Eye />}</button>} autoComplete="new-password" />
+                      {password && <PasswordStrengthMeter password={password}/>}
+          </div>          
           <TextInput label="Confirm password" name="confirmPassword" type={showConfim ? "text" : "password"} value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Repeat new password" required rightElement={<button type='button' onClick={() => setShowConfim((s) => !s)} className='text-xs text-[#6B6B6B] px-2 py-1 rounded'>{showConfim ? <EyeOff /> : <Eye />}</button>} autoComplete="new-password" />
           
           <PrimaryButton type='submit' loading={loading} className='w-full'>Reset Password</PrimaryButton>
