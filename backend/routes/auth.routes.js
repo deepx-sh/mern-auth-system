@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isAuthenticated, login, logout, refreshAccessToken, register, resendVerifyOtp, resetPassword, sendPasswordResetOtp, verifyEmailOtp, verifyResetPasswordOtp } from "../controllers/auth.controller.js";
+import { isAuthenticated, listSessions, login, logout, refreshAccessToken, register, resendVerifyOtp, resetPassword, revokeSession, sendPasswordResetOtp, verifyEmailOtp, verifyResetPasswordOtp } from "../controllers/auth.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { validateEmailDomain } from "../middlewares/emailDomain.middleware.js";
 import { validateRegister } from "../middlewares/validateRegister.middleware.js";
@@ -32,4 +32,7 @@ router.route("/verify-reset-otp").post(otpVerifyLimiter,validateVerifyResetOtp,v
 router.route("/reset-password").post(passwordResetLimiter,validateResetPassword, resetPassword)
 
 router.route("/refresh-token").post(refreshAccessToken)
+
+router.route("/sessions").get(verifyJWT, listSessions);
+router.route("/sessions/:id").delete(verifyJWT,revokeSession)
 export default router

@@ -20,6 +20,7 @@ import { ToastContainer } from "react-toastify";
 import Dashboard from "./pages/Dashboard.jsx";
 import VerifyResetOtp from "./pages/auth/VerifyResetOtp.jsx";
 import { RedirectIfAuth, RequireAuth } from "./routes/guards.jsx";
+import SessionPage from "./pages/SessionPage.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -38,6 +39,7 @@ const router = createBrowserRouter(
         <Route path="verify-reset-otp" element={<VerifyResetOtp />} />
       <Route element={<RequireAuth />}>
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="session" element={<SessionPage/>} />
       </Route>
      
     </Route>

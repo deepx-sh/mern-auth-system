@@ -2,6 +2,33 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+const SessionSchema = new mongoose.Schema({
+  _id: {
+    type: mongoose.Schema.Types.ObjectId,
+    auto:true
+  },
+  refreshTokenHash: {
+    type: String,
+    required:true
+  },
+  userAgent: {
+    type: String,
+  },
+  ip: {
+    type:String
+  },
+  createdAt: {
+    type: Date,
+    default:Date.now
+  },
+  lastUsedAt: {
+    type: Date,
+    default:Date.now
+  },
+  expiresAt: {
+    type:Date
+  }
+})
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -42,10 +69,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    refreshToken: {
-      type: String,
-      default:""
-    }
+    sessions: {
+      type: [SessionSchema],
+      default:[]
+   }
   },
   { timestamps: true }
 );

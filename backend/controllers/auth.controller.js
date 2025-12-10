@@ -6,7 +6,9 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendWelcomeEmail } from "./email.controller.js";
 import { generateAndSendOtp } from "../utils/generateSendOtp.js";
-import jwt from 'jsonwebtoken'
+import jwt, { decode } from 'jsonwebtoken'
+import { createSessionAndToken } from "../utils/auth.js";
+import { hashToken, safeCompare } from "../utils/tokenHash.js";
 
 
 const generateAccessTokensAndRefreshTokens = async (userId) => {
@@ -16,7 +18,13 @@ const generateAccessTokensAndRefreshTokens = async (userId) => {
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
 
-        user.refreshToken = refreshToken;
+        // user.refreshToken = refreshToken;
+
+        user.refreshToken.push({ token: refreshToken })
+        
+        if (user.refreshToken.length > 5) {
+            user.refreshToken.shift();
+        }
         await user.save({validateBeforeSave:false})
         return { accessToken ,refreshToken};
     } catch (error) {
@@ -114,9 +122,12 @@ export const login = asyncHandler(async (req, res) => {
     }
 
      // Access Token Generation
-    const {accessToken,refreshToken} = await generateAccessTokensAndRefreshTokens(user._id);
+    // const {accessToken,refreshToken} = await generateAccessTokensAndRefreshTokens(user._id);
+
+    const {accessToken,refreshToken,sessionId}=await createSessionAndToken(user,req)
 
     const loggedInUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt  -resetOtp -resetOtpExpireAt -refreshToken");
+    loggedInUser.sessionId=sessionId
 
     // Cookie Config
     // const options = {
@@ -138,17 +149,20 @@ export const logout = asyncHandler(async (req, res) => {
     //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
     //     maxAge:7*24*60*60*1000,
     // }
-    const userId = req.user?.id;
-    if (userId) {
-        await User.findByIdAndUpdate(
-        req.user._id,
-        {
-            $set: {
-                refreshToken:""
+    const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+    // const userId = req.user?.id;
+    if (incomingRefreshToken) {
+        try {
+            const decodedInfo = jwt.verify(incomingRefreshToken, process.env.JWT_REFRESH_TOKEN_SECRET);
+            const user = await User.findById(decodedInfo._id);
+
+            if (user) {
+                user.sessions = user.sessions.filter(s => s._id.toString() !== decodedInfo.sid);
+                await user.save();
             }
-        },
-        {new:true}
-    )
+        } catch (error) {
+            
+        }
    }
 
     const options=getCookieOptions(0)
@@ -210,9 +224,12 @@ export const verifyEmailOtp = asyncHandler(async (req, res) => {
         
     }
 
-    const {accessToken,refreshToken} = await generateAccessTokensAndRefreshTokens(user._id)
+    // const {accessToken,refreshToken} = await generateAccessTokensAndRefreshTokens(user._id)
+        const {accessToken,refreshToken,sessionId}=await createSessionAndToken(user,req)
+
     
-    const loggedInUser=await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt -refreshToken")
+    const loggedInUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt -refreshToken")
+    loggedInUser.sessionId=sessionId
     // Cookie Config
     // const options = {
     //     httpOnly: true,
@@ -375,55 +392,92 @@ export const resetPassword = asyncHandler(async (req, res) => {
 export const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
    
+    console.log(incomingRefreshToken);
     
     if (!incomingRefreshToken) {
         throw new ApiError(401,"Refresh token is required")
     }
 
+    let decodedInfo;
     try {
-        const decodedInfo = jwt.verify(incomingRefreshToken, process.env.JWT_REFRESH_TOKEN_SECRET);
-
-        const user = await User.findById(decodedInfo._id);
-
-        if (!user) {
-            throw new ApiError(401,"Invalid refresh token")
-        }
-
-        if (incomingRefreshToken !== user?.refreshToken) {
-            throw new ApiError(401,"Refresh token is expired or already used")
-        }
-
-        const { accessToken, refreshToken: newRefreshToken } = await generateAccessTokensAndRefreshTokens(user._id);
-
-        return res.status(200).cookie("accessToken",accessToken,getCookieOptions(15*60*1000)).cookie("refreshToken",newRefreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200,{accessToken,refreshToken:newRefreshToken},"Access Token refreshed successfully"))
+        decodedInfo=jwt.verify(incomingRefreshToken,process.env.JWT_REFRESH_TOKEN_SECRET)
     } catch (error) {
-        if (error.name === "TokenExpiredError" || error.name === "JsonWebTokenError") {
-            try {
-                const decodedInfo = jwt.decode(incomingRefreshToken);
-                if (decodedInfo._id) {
-                    await User.findByIdAndUpdate(decodedInfo?._id, {
-                        $set:{refreshToken:""}
-                    })
-                }
-            } catch (cleanupError) {
-                console.error("failed to clear expired refresh token",cleanupError);
-                
-            }
-        }
-        if (error.name === "TokenExpiredError") {
-            const clearOptions = getCookieOptions(0);
-            res.clearCookie("accessToken", clearOptions);
-            res.clearCookie("refreshToken",clearOptions)
-            throw new ApiError(401,"Session expired. Please login again")
-        }
-
-        if (error.name === "JsonWebTokenError") {
-            throw new ApiError(401,"Invalid refresh token")
-        }
-
-        if (error instanceof ApiError) {
-            throw error
-        }
-        throw new ApiError(401,"Invalid refresh token")
+        throw new ApiError(401,"Invalid or expired refresh token")
     }
+
+    const userId = decodedInfo._id;
+    const sid = decodedInfo.sid;
+    const user = await User.findById(userId);
+
+    if (!user) {
+        throw new ApiError(401,"User not found")
+    }
+
+    const session = user.sessions.id(sid);
+    if (!session) {
+        // user.sessions = [];
+        // await user.save();
+        throw new ApiError(401,"Session not found")
+    }
+
+    const incomingHash = hashToken(incomingRefreshToken);
+
+    if (!safeCompare(incomingHash, session.refreshTokenHash)) {
+        user.sessions = [];
+        await user.save();
+        throw new ApiError(401,"Refresh token mismatch - possible theft")
+    }
+
+    const newRefreshToken = jwt.sign({ _id: user._id.toString(), sid: session._id.toString() }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRE });
+    const newRefreshHash = hashToken(newRefreshToken);
+
+    session.refreshTokenHash = newRefreshHash;
+    session.lastUsedAt = new Date();
+    session.expiresAt=new Date(Date.now()+(7*24*3600*1000))
+    await user.save();
+
+    const newAccessToken = jwt.sign({ _id: user._id.toString() }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRE })
+    
+    return res.status(200).cookie("accessToken",newAccessToken,getCookieOptions(15*60*1000)).cookie("refreshToken",newRefreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200,{accessToken:newAccessToken},"Token refreshed"))
+});
+
+
+export const listSessions = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).select("sessions");
+    if (!user) {
+        throw new ApiError(404,"User not found")
+    }
+
+    const sessions = user.sessions.map(s => ({
+        id: s._id,
+        userAgent: s.userAgent,
+        ip: s.ip,
+        createdAt: s.createdAt,
+        lastUsedAt: s.lastUsedAt,
+        expiresAt: s.expiresAt,
+        isCurrent: req.cookies?.refreshToken ? (() => {
+            try {
+                const decodedInfo = jwt.verify(req.cookies.refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET);
+                return decodedInfo?.sid === s._id.toString();
+            } catch (error) {
+                return false;
+            }
+        })() : false
+    }))
+
+    return res.status(200).json(new ApiResponse(200,sessions,"Sessions fetched successfully"))
+});
+
+
+export const revokeSession = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    if(!user){
+        throw new ApiError(404,"User not found")
+    }
+
+    const sessionId = req.params.id;
+    user.sessions = user.sessions.filter(s => s._id.toString() !== sessionId);
+    await user.save();
+
+    return res.status(200).json(new ApiResponse(200,{},"Session revoked successfully"))
 })

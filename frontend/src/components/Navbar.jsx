@@ -111,6 +111,11 @@ const Navbar = () => {
                       }} className='w-full text-left px-3 py-2 hover:bg-[#1A1A1A] transition'>Reset Password</button>
 
                       <button type='button' onClick={() => {
+                        navigate("/session");
+                        setMenuOpen(false);
+                      }} className='w-full text-left px-3 py-2 hover:bg-[#1A1A1A] transition'>Manage Session</button>
+
+                      <button type='button' onClick={() => {
                         handleLogout();
                         setMenuOpen(false);
                       }} className='w-full text-left px-3 py-2 text-[#FF6B00] hover:bg-[#1A1A1A] transition'>Logout</button>
@@ -161,6 +166,10 @@ const Navbar = () => {
                 )}
 
                 <button type='button' onClick={handleResetPassword} className='w-full text-left text-sm px-3 py-2 hover:bg-[#111111] text-[#F8F8F8]'>Reset Password</button>
+                <button type='button' onClick={() => {
+                        navigate("/session");
+                        setMenuOpen(false);
+                      }} className='w-full text-left px-3 py-2 hover:bg-[#1A1A1A] transition'>Manage Session</button>
                                   <button type='button' onClick={handleLogout} className='w-full text-left text-sm px-3 py-2 hover:bg-[#111111] text-[#F8F8F8]'>Logout</button>
 
 

@@ -20,7 +20,18 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         
     if (!user) {
         throw new ApiError(401,"Invalid access token")
-    }
+        }
+        
+        const sessionId = decodedInfo.sid;
+        if (!sessionId) {
+            
+        } else {
+            const sessionExists = user.sessions.some(s => s._id.toString() === sessionId);
+
+            if (!sessionExists) {
+                throw new ApiError(401,"Sessions expired or revoked")
+            }
+        }
     req.user = user;
     next();
     } catch (error) {
