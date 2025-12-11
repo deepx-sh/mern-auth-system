@@ -381,6 +381,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
 
     // Hash Password and save
     user.password = newPassword;
+    user.sessions = [];
     await user.save();
 
     return res.status(200).json(new ApiResponse(200,{},"Password reset successfully"))
@@ -480,4 +481,14 @@ export const revokeSession = asyncHandler(async (req, res) => {
     await user.save();
 
     return res.status(200).json(new ApiResponse(200,{},"Session revoked successfully"))
+});
+
+export const logoutAll = asyncHandler(async(req,res)=> {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        throw new ApiError(404,"User not found")
+    }
+    user.sessions = [];
+    await user.save();
+    return res.status(200).clearCookie("accessToken",getCookieOptions(0)).clearCookie("refreshToken",getCookieOptions(0)).json(new ApiResponse(200,{},"All sessions revoked successfully"))
 })

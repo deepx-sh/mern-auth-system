@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isAuthenticated, listSessions, login, logout, refreshAccessToken, register, resendVerifyOtp, resetPassword, revokeSession, sendPasswordResetOtp, verifyEmailOtp, verifyResetPasswordOtp } from "../controllers/auth.controller.js";
+import { isAuthenticated, listSessions, login, logout, logoutAll, refreshAccessToken, register, resendVerifyOtp, resetPassword, revokeSession, sendPasswordResetOtp, verifyEmailOtp, verifyResetPasswordOtp } from "../controllers/auth.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { validateEmailDomain } from "../middlewares/emailDomain.middleware.js";
 import { validateRegister } from "../middlewares/validateRegister.middleware.js";
@@ -17,7 +17,7 @@ router.route("/register").post(registerLimiter,validateRegister,validateEmailDom
 router.route("/login").post(loginLimiter,validateLogin,login);
 
 router.route("/logout").post(verifyJWT, logout);
-
+router.route("/logout-all").post(verifyJWT,logoutAll)
 router.route("/verify-otp").post(otpVerifyLimiter,validateVerifyEmailOtp,verifyEmailOtp)
 
 router.route("/resend-verify-otp").post(otpLimiter,resendVerifyOtp)
