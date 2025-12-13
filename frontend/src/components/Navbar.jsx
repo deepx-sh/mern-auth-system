@@ -134,7 +134,7 @@ const Navbar = () => {
           </div>
       </div>
 
-      <div className={`sm:hidden border-t  border-white/10 bg-[#050505]/95 transition-all duration-200 ease-out ${mobileOpen? "max-h-32 opacity-100": "max-h-0 opacity-0"} overflow-hidden`}>
+      <div className={`sm:hidden border-t  border-white/10 bg-[#050505]/95 transition-all duration-200 ease-out ${mobileOpen? "max-h-96 opacity-100": "max-h-0 opacity-0"} overflow-hidden`}>
         <div className='mx-auto max-w-6xl px-4 py-3 space-y-1'>
           {!isLoggedIn ? (
             <>
@@ -169,7 +169,7 @@ const Navbar = () => {
                 <button type='button' onClick={() => {
                         navigate("/session");
                         setMenuOpen(false);
-                      }} className='w-full text-left px-3 py-2 hover:bg-[#1A1A1A] transition'>Manage Session</button>
+                      }} className='w-full text-sm text-left px-3 py-2 hover:bg-[#1A1A1A] text-[#F8F8F8] transition'>Manage Session</button>
                                   <button type='button' onClick={handleLogout} className='w-full text-left text-sm px-3 py-2 hover:bg-[#111111] text-[#F8F8F8]'>Logout</button>
 
 

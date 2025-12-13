@@ -112,7 +112,7 @@ const SessionPage = () => {
   return (
       <main className='min-h-[60vh] p-6 bg-[#F5F4F1]'>
           <div className='mx-auto max-w-4xl'>
-              <div className='flex items-center justify-between gap-4 mb-6'>
+              <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between  mb-6'>
                   <div>
                       <h1 className='text-2xl font-semibold text-[#0D0D0D]'>Active sessions</h1>
                       <p className='mt-1 text-sm text-[#6B6B6B]'>Manage devices and sign out from sessions you no longer use</p>
@@ -152,7 +152,7 @@ const SessionPage = () => {
                                                   </div>
 
                                                   {s.isCurrent && (
-                                                      <span className='inline-flex items-center rounded-full bg-[#E8F8F1] px-2 py-0.5 text-xs text-[#0B9E6F]'>Current device</span>
+                                                      <span className='inline-flex shrink-0 whitespace-nowrap items-center rounded-full bg-[#E8F8F1] px-2 py-0.5 text-xs text-[#0B9E6F]'>Current device</span>
                                                   )}
                                               </div>
 
