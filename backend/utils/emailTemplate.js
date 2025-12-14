@@ -1,3 +1,11 @@
+const escapeHtml = (str) => {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+}
 export const welcomeEmailTemplate = (name) => {
    return `<h2> Welcome to <strong>SecureNation</strong>🥳</h2>
     <p>Hi ${name},</p>
