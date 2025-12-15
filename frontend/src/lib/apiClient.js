@@ -37,7 +37,7 @@ const handleSessionExpiry = () => {
 
      setTimeout(() => {
                         window.location.href="/login"
-                    },1000)
+                    },3000)
 }
 
 const NO_REFRESH_ENDPOINTS=["/auth/login","/auth/register","/auth/verify-otp","/auth/forget-password","/auth/verify-reset-otp","/auth/reset-password","/auth/refresh-token","/auth/resend-verify-otp"]

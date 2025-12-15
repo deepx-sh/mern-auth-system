@@ -133,7 +133,7 @@ const SessionPage = () => {
                               <div className='space-y-3'>{sessions.map((s) => {
                                   const info = parseUserAgent(s.userAgent);
                                   return (
-                                      //   const info=parseUserAgent(s.userAgent)
+                                        //   const info=parseUserAgent(s.userAgent)
                                       <div key={s.id} className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 rounded-lg border border-[#F0F0F0] hover:bg-[#FCFBFA] transition'>
                                           <div className='flex-1 min-w-0'>
                                               <div className='flex items-center gap-3'>

@@ -88,6 +88,16 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.isPasswordMatch = async function (typedPassword) {
   return await bcrypt.compare(typedPassword, this.password);
 };
+
+// Clean expire sessions
+userSchema.methods.cleanupExpiredSessions = function () {
+  this.sessions = this.sessions.filter(s => s.expiresAt > Date.now());
+}
+
+userSchema.pre('save', function (next) {
+  this.cleanupExpiredSessions();
+  next();
+})
 // Generate Access Token
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(

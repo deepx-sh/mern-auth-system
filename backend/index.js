@@ -12,7 +12,7 @@ import "dotenv/config";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import userRouter from "./routes/user.routes.js";
-
+import mongoSanitize from "express-mongo-sanitize"
 const app = express();
 const PORT = process.env.PORT || 4000;
 
@@ -21,6 +21,7 @@ connectDB();
 
 app.set('trust proxy',1)
 app.use(express.json());
+// app.use(mongoSanitize())
 app.use(cookieParser());
 
 const allowedOrigin = [
@@ -53,6 +54,7 @@ app.get("/", (req, res) => {
 import authRouter from "./routes/auth.routes.js";
 import { ApiError } from "./utils/ApiError.js";
 import { apiSpeedLimiter, globalLimiter } from "./middlewares/rateLimiter.middleware.js";
+import ExpressMongoSanitize from "express-mongo-sanitize";
 
 app.use("/api/auth", authRouter);
 
