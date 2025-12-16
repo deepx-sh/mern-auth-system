@@ -50,7 +50,7 @@ export const register = asyncHandler(async (req, res) => {
 
     // Check if any field blank or not
     if ([name, email, password].some((field) => field?.trim() === "")) {
-        throw new ApiError(400,"All field are required")
+        throw new ApiError(400,"All fields are required")
     }
 
     // Check if user exist or not by email
@@ -91,9 +91,15 @@ export const register = asyncHandler(async (req, res) => {
     // Send Verification OTP
     await generateAndSendOtp(createdUser, "verify")
     
-    const newCreatedUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt -refreshToken");
+    // const newCreatedUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt -refreshToken");
+
+    const responseData = {
+        name: user.name,
+        email: user.email,
+        isVerified:user.isVerified
+    }
     // return res.status(201).cookie("accessToken", token, options).json(new ApiResponse(200, createdUser, "User registration successfully!"));
-    return res.status(201).json(new ApiResponse(200,newCreatedUser,"User registered successfully. OTP sent to you email"))
+    return res.status(201).json(new ApiResponse(200,responseData,"User registered successfully. Verification code sent to your email"))
 
 })
 
@@ -111,7 +117,7 @@ export const login = asyncHandler(async (req, res) => {
     const user = await User.findOne({email})
     
     if (!user) {
-        throw new ApiError(404,"User not found")
+        throw new ApiError(404,"Invalid email or password")
     }
 
     // Check password match or not
@@ -126,8 +132,8 @@ export const login = asyncHandler(async (req, res) => {
 
     const {accessToken,refreshToken,sessionId}=await createSessionAndToken(user,req)
 
-    const loggedInUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt  -resetOtp -resetOtpExpireAt -refreshToken");
-    loggedInUser.sessionId=sessionId
+    // const loggedInUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt  -resetOtp -resetOtpExpireAt -refreshToken");
+    // loggedInUser.sessionId=sessionId
 
     // Cookie Config
     // const options = {
@@ -136,7 +142,14 @@ export const login = asyncHandler(async (req, res) => {
     //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
     //     maxAge:7*24*60*60*1000,
     // }
-    return res.status(200).cookie("accessToken", accessToken, getCookieOptions(15*60*1000)).cookie("refreshToken",refreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200, loggedInUser, "User logged in successfully!"));
+
+    const responseData = {
+        name: user.name,
+        email: user.email,
+        isVerified: user.isVerified,
+        sessionId
+    }
+    return res.status(200).cookie("accessToken", accessToken, getCookieOptions(15*60*1000)).cookie("refreshToken",refreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200, responseData, "Logged in successfully!"));
 
 });
 
@@ -166,7 +179,7 @@ export const logout = asyncHandler(async (req, res) => {
    }
 
     const options=getCookieOptions(0)
-    return res.status(200).clearCookie("accessToken",options).clearCookie("refreshToken",options).json(new ApiResponse(200,{},"User logout successfully"))
+    return res.status(200).clearCookie("accessToken",options).clearCookie("refreshToken",options).json(new ApiResponse(200,{},"Logged out successfully"))
 });
 
 
@@ -186,12 +199,12 @@ export const verifyEmailOtp = asyncHandler(async (req, res) => {
 
     // Already Verified
     if (user.isVerified) {
-        throw new ApiError(400,"Email already verified")
+        throw new ApiError(400,"Email is already verified")
     }
 
     // No otp saved
     if (!user.verifyOtp || !user.verifyOtpExpireAt) {
-        throw new ApiError(400,"No OTP found. Please request new one")
+        throw new ApiError(400,"No OTP found. Please request a new one")
     }
 
     // Check expire
@@ -228,8 +241,8 @@ export const verifyEmailOtp = asyncHandler(async (req, res) => {
         const {accessToken,refreshToken,sessionId}=await createSessionAndToken(user,req)
 
     
-    const loggedInUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt -refreshToken")
-    loggedInUser.sessionId=sessionId
+    // const loggedInUser = await User.findById(user._id).select("-password -verifyOtp -verifyOtpExpireAt -resetOtp -resetOtpExpireAt -refreshToken")
+    // loggedInUser.sessionId=sessionId
     // Cookie Config
     // const options = {
     //     httpOnly: true,
@@ -237,32 +250,42 @@ export const verifyEmailOtp = asyncHandler(async (req, res) => {
     //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
     //     maxAge:7*24*60*60*1000,
     // }
-
-    return res.status(200).cookie("accessToken",accessToken,getCookieOptions(15*60*1000)).cookie("refreshToken",refreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200,loggedInUser,"Email Verified Successfully. Logged in"))
+    const loggedInUser = await User.findById(user._id);
+    const responseData = {
+        name: loggedInUser.name,
+        email: loggedInUser.email,
+        isVerified: loggedInUser.isVerified,
+        sessionId
+    }
+    return res.status(200).cookie("accessToken",accessToken,getCookieOptions(15*60*1000)).cookie("refreshToken",refreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200,responseData,"Email Verified Successfully. You are now logged in."))
 });
 
 // Resend Verify OTP for email verification
 
 export const resendVerifyOtp = asyncHandler(async (req, res) => {
-    const { email } = req.body || {}
-    
-    if (!email || email.trim() === "") {
+    let { email } = req.body || {}
+    if (!email) {
         throw new ApiError(400,"Email is required")
+    }
+
+    email = email.trim().toLowerCase();
+    if (email.trim() === "") {
+        throw new ApiError(400,"Email cannot be empty")
     }
 
     const user = await User.findOne({ email });
 
     if (!user) {
-        throw new ApiError(404,"User not found")
+        throw new ApiError(404,"No account found with this email")
     }
 
     if (user.isVerified) {
-        throw new ApiError(400,"Email is already verified")
+        throw new ApiError(400,"This email is already verified")
     }
 
     await generateAndSendOtp(user, "verify");
 
-return res.status(200).json(new ApiResponse(200,{},"Verification OTP sent"))
+return res.status(200).json(new ApiResponse(200,{email},"New verification code sent to your email. Please check your inbox."))
 })
 // Check if user is authenticated or not
 
@@ -286,7 +309,7 @@ export const sendPasswordResetOtp = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-        return res.status(200).json(new ApiResponse(200,{},"If this email is registered, an OTP has been sent"))
+        return res.status(200).json(new ApiResponse(200,{},"If this email is registered, a password reset code has been sent"))
     }
 
     // Only allow if user email is already verified
@@ -298,7 +321,7 @@ export const sendPasswordResetOtp = asyncHandler(async (req, res) => {
     // Generate reset otp and send to registered email
     await generateAndSendOtp(existUser, "resetPassword");
 
-    return res.status(200).json(new ApiResponse(200,{},"Password reset OTP sent to your registered email"))
+    return res.status(200).json(new ApiResponse(200,{},"Password reset code sent to your email. Please check your inbox"))
 });
 
 
@@ -318,7 +341,7 @@ export const verifyResetPasswordOtp = asyncHandler(async (req, res) => {
     }
 
     if (!user.resetOtp || !user.resetOtpExpireAt) {
-        throw new ApiError(400,"No reset OTP found. Please request new one")
+        throw new ApiError(400,"No reset OTP found. Please request a new one")
     }
 
     // Check for expiry
@@ -327,7 +350,7 @@ export const verifyResetPasswordOtp = asyncHandler(async (req, res) => {
         user.resetOtpExpireAt = 0;
         await user.save();
 
-        throw new ApiError(400,"OTP has expired. Please request new one")
+        throw new ApiError(400,"OTP has expired. Please request a new one")
     }
 
     // Compare OTP
@@ -366,7 +389,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
     try {
         decodedInfo=await jwt.verify(resetToken,process.env.JWT_RESET_PASSWORD_SECRET)
     } catch (error) {
-        throw new ApiError(400,"Invalid or expire reset token")
+        throw new ApiError(400,"Invalid or expired reset token")
     }
      
     const user = await User.findById(decodedInfo._id);
@@ -375,6 +398,9 @@ export const resetPassword = asyncHandler(async (req, res) => {
         throw new ApiError(404,"User not found")
     }
 
+    if (decodedInfo.email !== user.email) {
+        throw new ApiError(400,"Invalid reset token")
+    }
     if (decodedInfo.purpose !== "resetPassword") {
         throw new ApiError(400,"Invalid reset token purpose")
     }
@@ -384,7 +410,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
     user.sessions = [];
     await user.save();
 
-    return res.status(200).json(new ApiResponse(200,{},"Password reset successfully"))
+    return res.status(200).json(new ApiResponse(200,{},"Password reset successfully. You can now log in with your new password."))
 });
 
 
@@ -426,7 +452,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     if (!safeCompare(incomingHash, session.refreshTokenHash)) {
         user.sessions = [];
         await user.save();
-        throw new ApiError(401,"Refresh token mismatch - possible theft")
+        throw new ApiError(401,"Invalid refresh token possible compromise detected")
     }
 
     const newRefreshToken = jwt.sign({ _id: user._id.toString(), sid: session._id.toString() }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRE });
@@ -439,7 +465,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const newAccessToken = jwt.sign({ _id: user._id.toString() }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRE })
     
-    return res.status(200).cookie("accessToken",newAccessToken,getCookieOptions(15*60*1000)).cookie("refreshToken",newRefreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200,{accessToken:newAccessToken},"Token refreshed"))
+    return res.status(200).cookie("accessToken",newAccessToken,getCookieOptions(15*60*1000)).cookie("refreshToken",newRefreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200,{accessToken:newAccessToken},"Token refreshed successfully"))
 });
 
 
@@ -451,8 +477,8 @@ export const listSessions = asyncHandler(async (req, res) => {
 
     const sessions = user.sessions.map(s => ({
         id: s._id,
-        userAgent: s.userAgent,
-        ip: s.ip,
+        userAgent: s.userAgent || "Unknown device",
+        ip: s.ip || "Unknown IP",
         createdAt: s.createdAt,
         lastUsedAt: s.lastUsedAt,
         expiresAt: s.expiresAt,
@@ -466,7 +492,12 @@ export const listSessions = asyncHandler(async (req, res) => {
         })() : false
     }))
 
-    return res.status(200).json(new ApiResponse(200,sessions,"Sessions fetched successfully"))
+    sessions.sort((a, b) => {
+        if (a.isCurrent) return -1;
+        if (b.isCurrent) return 1;
+        return new Date(b.lastUsedAt)- new Date(a.lastUsedAt)
+    })
+    return res.status(200).json(new ApiResponse(200,sessions,"Active sessions fetched successfully"))
 });
 
 

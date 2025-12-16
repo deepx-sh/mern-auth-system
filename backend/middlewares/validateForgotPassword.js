@@ -13,14 +13,14 @@ export const validateForgotPassword = asyncHandler(async (req, res, next) => {
         throw new ApiError(400,"Email is required")
     }
 
-    const trimmedEmail = email.trim();
+    const trimmedEmail = email.trim().toLowerCase();
 
     if (!trimmedEmail) {
-        throw new ApiError(400, "Email is required");
+        throw new ApiError(400, "Email cannot be empty");
     }
 
     if (!emailRegex.test(trimmedEmail)) {
-        throw new ApiError(400,"Enter a valid email")
+        throw new ApiError(400,"Please enter a valid email address")
     }
 
     req.body.email = trimmedEmail;

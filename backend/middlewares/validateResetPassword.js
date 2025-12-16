@@ -12,10 +12,10 @@ export const validateResetPassword = asyncHandler(async (req, res, next) => {
     }
 
     const trimmedToken = resetToken.trim();
-    const trimmedPassword = newPassword.trim();
+    const trimmedPassword = newPassword;
 
     if (!trimmedToken || !trimmedPassword) {
-        throw new ApiError(400,"Please enter a valid reset token or a valid password")
+        throw new ApiError(400,"Reset token and new password cannot be empty")
     }
 
     if (!passwordRegex.test(trimmedPassword)) {

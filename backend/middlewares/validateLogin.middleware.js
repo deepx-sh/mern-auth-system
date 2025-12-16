@@ -10,16 +10,16 @@ export const validateLogin = asyncHandler(async (req, res,next) => {
         throw new ApiError(400, "Email and password are required");
     }
 
-    const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password;
 
     if (!trimmedEmail || !trimmedPassword) {
-        throw new ApiError(400,"Email and password are required");
+        throw new ApiError(400,"Email and password cannot be empty");
         
     }
 
     if (!emailRegex.test(trimmedEmail)) {
-        throw new ApiError(400,"Enter a valid email")
+        throw new ApiError(400,"Please enter a valid email address")
     }
 
     req.body.email = trimmedEmail;

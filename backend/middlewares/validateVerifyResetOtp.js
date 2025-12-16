@@ -10,19 +10,19 @@ export const validateVerifyResetOtp = asyncHandler(async (req, res, next) => {
         throw new ApiError(400,"Email and reset OTP are required")
     }
 
-    const trimmedEmail = email.trim();
+    const trimmedEmail = email.trim().toLowerCase();
     const trimmedOtp = String(otp).trim();
 
     if (!trimmedEmail || !trimmedOtp) {
-        throw new ApiError(400, "Email and reset OTP are required");
+        throw new ApiError(400, "Email and OTP cannot be empty");
     }
 
     if (!emailRegex.test(trimmedEmail)) {
-        throw new ApiError(400,"Enter a valid email");
+        throw new ApiError(400,"Please enter a valid email address");
     }
 
     if (!/^\d{6}$/.test(trimmedOtp)) {
-        throw new ApiError(400, "Enter a valid reset OTP code");
+        throw new ApiError(400, "OTP must be exactly 6 digits");
     }
 
     req.body.email = trimmedEmail;

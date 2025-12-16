@@ -14,8 +14,8 @@ export const validateRegister = asyncHandler(async (req, res,next) => {
     }
 
     const trimmedName = name.trim();
-    const trimmedEmail = email.trim();
-    const trimmedPassword = password.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password;
 
     if (!trimmedName || !trimmedEmail || !trimmedPassword) {
         throw new ApiError(400, "All fields are required");
