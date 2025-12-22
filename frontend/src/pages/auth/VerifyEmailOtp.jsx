@@ -42,10 +42,10 @@ const VerifyEmailOtp = () => {
 
     try {
       const res = await apiClient.post("/auth/verify-otp", { email: emailFormState, otp })
-      console.log(res);
+      // console.log(res);
       
       const data = res.data.data || {};
-      console.log(data);
+      // console.log(data);
       
       toast.success(res.data.message || "Email verified successfully");
 
@@ -58,7 +58,7 @@ const VerifyEmailOtp = () => {
       localStorage.removeItem("pendingEmail");
       navigate("/dashboard")
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       
       const msg = error?.response?.data?.message || error?.response?.data?.error || "Invalid or expired OTP";
       toast.error(msg);

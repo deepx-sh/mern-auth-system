@@ -9,7 +9,7 @@ export const sendWelcomeEmail = async (user)=>{
             html:welcomeEmailTemplate(user.name),
         })
     } catch (error) {
-        console.log("Error sending welcome email",error);
+        logger.error("Error sending welcome email",error);
         
     }
 }

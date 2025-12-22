@@ -21,14 +21,18 @@ import Dashboard from "./pages/Dashboard.jsx";
 import VerifyResetOtp from "./pages/auth/VerifyResetOtp.jsx";
 import { RedirectIfAuth, RequireAuth } from "./routes/guards.jsx";
 import SessionPage from "./pages/SessionPage.jsx";
+import {ErrorBoundary} from "react-error-boundary"
+import PageErrorBoundary from "./components/PageErrorBoundary.jsx";
+import ErrorFallback from "./components/ErrorFallback.jsx";
+
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
-     <Route index element={<Home />} />
+      <Route index element={<Home />} />
       <Route element={<RedirectIfAuth />}>
          
-         
+        
         <Route path="register" element={<Register />} />
         <Route path="login" element={<Login />} />
       </Route>
@@ -45,9 +49,14 @@ const router = createBrowserRouter(
     </Route>
   )
 );
+
+const errorHandler = (error, errorInfo) => {
+  console.error("Global Error Boundary caught on error: ",error,errorInfo)
+}
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <UserContextProvider>
+    <ErrorBoundary FallbackComponent={ErrorFallback} onError={errorHandler} onReset={() => { window.location.href = '/'; }}>
+      <UserContextProvider>
       <RouterProvider router={router}>
         <App />
       </RouterProvider>
@@ -60,6 +69,8 @@ createRoot(document.getElementById("root")).render(
       closeOnClick
       pauseOnHover
       theme="dark"
+      preventDuplicates
     />
+    </ErrorBoundary>
   </StrictMode>
 );

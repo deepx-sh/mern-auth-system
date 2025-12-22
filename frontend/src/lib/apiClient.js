@@ -1,5 +1,6 @@
 import axios from "axios";
 import {toast} from 'react-toastify'
+import { isNetworkError } from "../utils/errorUtils";
 const apiBaseURL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 const apiClient = axios.create({
@@ -44,7 +45,15 @@ const NO_REFRESH_ENDPOINTS=["/auth/login","/auth/register","/auth/verify-otp","/
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
-
+        console.error("API ERROR", error?.response?.data?.message || error.message, error)
+        
+        // Network error
+        if (isNetworkError(error)) {
+            toast.error('Network error. Please check your connection', {
+                toastId:'network-error'
+            })
+            return Promise.reject(error)
+        }
         // Handle Rate limit error
         if (error.response?.status === 429) {
             const errorData = error.response.data;
@@ -52,16 +61,15 @@ apiClient.interceptors.response.use(
 
             if (retryAfter) {
                 const minutes = Math.ceil(retryAfter / 60);
-                toast.error(`${errorData.message}. Try again in ${minutes} minutes`),{autoClose:5000}
+                toast.error(`${errorData.message}. Try again in ${minutes} minutes`,{autoClose:5000,toastId:'rate-limit-error'})
             } else {
-                toast.error(errorData.message || "Too many requests. Please try again later")
+                toast.error(errorData.message || "Too many requests. Please try again later",{toastId:'rate-limit-error'})
             }
 
             return Promise.reject(error)
         }
         const originalReq = error.config;
-        console.log(error);
-        console.log(originalReq);
+        
         
         // if (originalReq.url.includes("/auth/refresh-token")) {
         //     return Promise.reject(error)
@@ -91,19 +99,16 @@ apiClient.interceptors.response.use(
             isRefreshing = true
             
             try {
-                console.log("Im");
+    
                 
                 await apiClient.post("/auth/refresh-token")
                 processQueue(null)
                 isRefreshing = false
                 return apiClient(originalReq)
             } catch (refreshError) {
-                console.log("Im in catch");
-                
                 processQueue(refreshError, null)
                 isRefreshing = false
                 
-                console.error("Refresh token failed");
                 const errorMsg = refreshError.response?.data?.message || "";
 
                 if (errorMsg.includes("expired") || errorMsg.includes("Session expired") || refreshError.response?.status === 401) {

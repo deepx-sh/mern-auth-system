@@ -109,7 +109,25 @@ export const otpVerifyLimiter=rateLimit({
     }
 });
 
-
+// For refresh Token
+export const refreshTokenLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    message: {
+        success: false,
+        message:"Too many refresh attempts. Please try again after 15 minutes"
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator,
+    handler: (req, res) => {
+        res.status(429).json({
+            success: false,
+            message: "Too many token refresh attempts. Please wait 15 minutes before trying again",
+            retryAfter:Math.ceil((req.rateLimit.resetTime-Date.now())/1000)
+        })
+    }
+})
 // Speed Limiters for API
 export const apiSpeedLimiter = slowDown({
     windowMs: 15 * 60 * 1000,

@@ -19,7 +19,7 @@ const UserContextProvider = ({ children }) => {
         await apiClient.post('/auth/is-auth')
       } catch (error) {
         if (error.response?.status === 401) {
-          console.log("Session invalid - clearing user data");
+          // console.log("Session invalid - clearing user data");
           setUserData(null);
           localStorage.removeItem("userData")
           

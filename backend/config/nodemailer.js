@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import logger from '../utils/logger.js';
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -21,10 +22,10 @@ export const sendEmail = async (options)=>{
         }
 
         await transporter.sendMail(mailOptions);
-        console.log("Mail sent successfully");
+        logger.info("Mail sent successfully");
         
     } catch (error) {
-        console.log("Failed to send email",error);
+        logger.error("Failed to send email",error);
         throw new Error("Email could not be sent")
     }
 }

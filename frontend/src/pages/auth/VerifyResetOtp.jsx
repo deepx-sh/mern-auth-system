@@ -41,7 +41,7 @@ const VerifyResetOtp = () => {
       const res = await apiClient.post("/auth/verify-reset-otp",{email:emailFromState,otp});
 
       const data = res.data.data || {};
-      console.log(data);
+     
       
       const resetToken = data.resetToken;
       
@@ -55,7 +55,7 @@ const VerifyResetOtp = () => {
       toast.success(res.data.message || "OTP verified. You can reset your password now");
       navigate("/reset-password", { state: { email: emailFromState } });
     } catch (error) {
-      console.log(error);
+      
       
       const msg = error?.response?.data?.message || error?.response?.data?.error || "Invalid or expired code"
       toast.error(msg);

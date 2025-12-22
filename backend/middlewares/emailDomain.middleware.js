@@ -3,11 +3,12 @@ import dns from 'dns/promises';
 
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
+import logger from '../utils/logger.js';
 
 
 
 let disposableSet = new Set();
-
+let refreshInterval = null;
 async function loadDisposableDomains() {
     try {
         const res = await fetch('https://raw.githubusercontent.com/disposable/disposable-email-domains/master/domains.txt')
@@ -21,16 +22,18 @@ async function loadDisposableDomains() {
         disposableSet = new Set(domains);
         
         
-        console.log(`Loaded ${disposableSet.size} disposable domains`);
+        
         
     } catch (error) {
-        console.error("Failed to load disposable domains list",error.message)
+        logger.error("Failed to load disposable domains list",error)
     }
 }
 
 loadDisposableDomains();
 
-setInterval(loadDisposableDomains, 24 * 60 * 60 * 1000);
+if (!refreshInterval) {
+    refreshInterval=setInterval(loadDisposableDomains, 24 * 60 * 60 * 1000);
+}
 
 // Check if domain has mx Record
 
@@ -48,7 +51,7 @@ async function hasValidMx(domain) {
 
 export const validateEmailDomain = asyncHandler(async (req, res, next) => {
     const rawEmail = req.body?.email;
-    console.log(rawEmail);
+    
     
     if (!rawEmail || typeof rawEmail !== "string") {
         throw new ApiError(400, "Email is required");
@@ -61,7 +64,7 @@ export const validateEmailDomain = asyncHandler(async (req, res, next) => {
     }
 
     const [, domain] = email.split("@");
-    console.log(domain);
+   
     
     if (!domain) {
         throw new ApiError(400, "Invalid email domain");

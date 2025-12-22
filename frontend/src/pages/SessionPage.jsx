@@ -7,6 +7,9 @@ import { useEffect } from 'react';
 import apiClient from '../lib/apiClient';
 import { toast } from 'react-toastify';
 import parseUserAgent from '../utils/parseUserAgent';
+import { ErrorBoundary } from 'react-error-boundary';
+import PageErrorBoundary from '../components/PageErrorBoundary';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 const SessionPage = () => {
 
@@ -15,6 +18,7 @@ const SessionPage = () => {
     const [revokingId, setRevokingId] = useState(null);
     const [logoutLoading, setLogoutLoading] = useState(false);
     const { setUserData } = useContext(UserContext);
+    const { handleError } = useErrorHandler();
 
     const navigate = useNavigate();
     
@@ -31,8 +35,9 @@ const SessionPage = () => {
             const data = payload.data || [];
             setSessions(data);
         } catch (error) {
-            const msg = error?.response?.data?.message || "Could not load sessions";
-            toast.error(msg);
+            // const msg = error?.response?.data?.message || "Could not load sessions";
+            // toast.error(msg,{toastId:'fetch-sessions-error'});
+            handleError(error,"Could not load sessions")
         } finally {
             setLoading(false)
         }
@@ -45,7 +50,7 @@ const SessionPage = () => {
             const d = new Date(iso);
             return d.toLocaleString();
         } catch (error) {
-            console.log(error);
+            console.error(error);
             
             return iso
         }
@@ -63,9 +68,10 @@ const SessionPage = () => {
             toast.success("Session revoked");
             setSessions((s) => s.filter((x) => x.id !== sessionId));
         } catch (error) {
-            console.log("Revoke failed",error);
-            const msg = error?.response?.data?.message || "Could not revoke session"
-            toast.error(msg);
+            console.error("Revoke failed",error);
+            // const msg = error?.response?.data?.message || "Could not revoke session"
+            // toast.error(msg,{toastId:'session-revoked-error'});
+            handleError(error,"Could not revoke session")
         } finally {
             setRevokingId(null);
         }
@@ -82,7 +88,7 @@ const SessionPage = () => {
             toast.success("Logged out");
             navigate("/login");
         } catch (error) {
-            console.log("Logout failed",error);
+            console.error("Logout failed",error);
             setUserData(null);
             const msg = error?.response?.data?.message || "Logout failed you have been signed out locally";
             toast.error(msg);
@@ -104,13 +110,17 @@ const SessionPage = () => {
             localStorage.removeItem("userData");
             navigate("/login");
         } catch (error) {
-            console.log("Revoke all failed",error);
+            console.error("Revoke all failed",error);
             const msg = error?.response?.data?.message || "Could not revoke all sessions"
-            toast.error(msg);
+            toast.error(msg,{toastId:'logoutAll-error'});
         }
     }
-  return (
-      <main className='min-h-[60vh] p-6 bg-[#F5F4F1]'>
+    return (
+        <ErrorBoundary FallbackComponent={PageErrorBoundary} onReset={() => {
+            setSessions([]),
+                fetchSessions();
+        }}>
+             <main className='min-h-[60vh] p-6 bg-[#F5F4F1]'>
           <div className='mx-auto max-w-4xl'>
               <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between  mb-6'>
                   <div>
@@ -192,6 +202,7 @@ const SessionPage = () => {
               </div>
           </div>
     </main>
+        </ErrorBoundary>
   )
 }
 

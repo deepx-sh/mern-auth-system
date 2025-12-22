@@ -5,7 +5,7 @@ import StatCard from '../components/StatCard';
 
 const Dashboard = () => {
     const { userData } = useContext(UserContext);
-    console.log(userData);
+    
     
     const name=userData?.name || "there"
   return (
@@ -31,7 +31,7 @@ const Dashboard = () => {
                   <section className='bg-[#0D0D0D] rounded-2xl overflow-hidden shadow-md flex flex-col'>
                       <div className='relative h-40 sm:h-56 md:h-64'>
                           <img src="https://images.unsplash.com/photo-1580894908361-967195033215?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="tech-woman-img" className='h-full w-full object-cover opacity-80' />
-                          <div className='absolute inset-0 bg-gradient-to-t from-[#0D0D0D] via-transparent to-transparent'></div>
+                          <div className='absolute inset-0 bg-linear-to-t from-[#0D0D0D] via-transparent to-transparent'></div>
                       </div>
 
                       <div className='p-5 flex-1 flex flex-col justify-center'>

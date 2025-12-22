@@ -8,7 +8,7 @@ import { validateVerifyEmailOtp } from "../middlewares/validateVerifyEmailOtp.js
 import { validateForgotPassword } from "../middlewares/validateForgotPassword.js";
 import { validateVerifyResetOtp } from "../middlewares/validateVerifyResetOtp.js";
 import { validateResetPassword } from "../middlewares/validateResetPassword.js";
-import { loginLimiter, otpLimiter, otpVerifyLimiter, passwordResetLimiter, registerLimiter } from "../middlewares/rateLimiter.middleware.js";
+import { loginLimiter, otpLimiter, otpVerifyLimiter, passwordResetLimiter, refreshTokenLimiter, registerLimiter } from "../middlewares/rateLimiter.middleware.js";
 
 const router = Router();
 
@@ -31,7 +31,7 @@ router.route("/verify-reset-otp").post(otpVerifyLimiter,validateVerifyResetOtp,v
 
 router.route("/reset-password").post(passwordResetLimiter,validateResetPassword, resetPassword)
 
-router.route("/refresh-token").post(refreshAccessToken)
+router.route("/refresh-token").post(refreshTokenLimiter,refreshAccessToken)
 
 router.route("/sessions").get(verifyJWT, listSessions);
 router.route("/sessions/:id").delete(verifyJWT,revokeSession)

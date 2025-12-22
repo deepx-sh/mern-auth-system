@@ -20,7 +20,6 @@ export const RedirectIfAuth = () => {
 
     if (isLoggedIn) {
         const redirectTo = location.state?.from?.pathname || "/dashboard";
-        console.log(location.state);
         
         return <Navigate to={ redirectTo} replace />
     }

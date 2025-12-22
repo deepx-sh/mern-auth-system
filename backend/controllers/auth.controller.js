@@ -9,6 +9,8 @@ import { generateAndSendOtp } from "../utils/generateSendOtp.js";
 import jwt, { decode } from 'jsonwebtoken'
 import { createSessionAndToken } from "../utils/auth.js";
 import { hashToken, safeCompare } from "../utils/tokenHash.js";
+import path from "path";
+import logger from "../utils/logger.js";
 
 
 const generateAccessTokensAndRefreshTokens = async (userId) => {
@@ -37,8 +39,12 @@ const generateAccessTokensAndRefreshTokens = async (userId) => {
 const getCookieOptions = (maxAge) => ({
      httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-        maxAge,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge,
+    path: '/',
+    ...(process.env.NODE_ENV === 'production' && process.env.COOKIE_DOMAIN && {
+        domain:process.env.COOKIE_DOMAIN
+    })
 })
 export const register = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body || {};
@@ -233,7 +239,7 @@ export const verifyEmailOtp = asyncHandler(async (req, res) => {
     try {
         await sendWelcomeEmail(user)
     } catch (err) {
-        console.log("Failed to send welcome email:",err.message);
+        logger.error("Failed to send welcome email:",err);
         
     }
 
@@ -419,7 +425,6 @@ export const resetPassword = asyncHandler(async (req, res) => {
 export const refreshAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
    
-    console.log(incomingRefreshToken);
     
     if (!incomingRefreshToken) {
         throw new ApiError(401,"Refresh token is required")
