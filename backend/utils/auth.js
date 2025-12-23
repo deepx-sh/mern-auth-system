@@ -27,6 +27,10 @@ export const createSessionAndToken = async (user, req) => {
         expiresAt:new Date(Date.now()+(7*24*3600*1000))
     }
 
+    if (user.sessions.length >= 5) {
+        user.sessions.sort((a, b) => new Date(a.lastUsedAt) - new Date(b.lastUsedAt))
+        user.sessions.shift();
+    }
     user.sessions.push(session);
     await user.save();
 
