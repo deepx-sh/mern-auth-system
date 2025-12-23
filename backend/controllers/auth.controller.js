@@ -155,7 +155,7 @@ export const login = asyncHandler(async (req, res) => {
         isVerified: user.isVerified,
         sessionId
     }
-    return res.status(200).cookie("accessToken", accessToken, getCookieOptions(15*60*1000)).cookie("refreshToken",refreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200, responseData, "Logged in successfully!"));
+    return res.status(200).cookie("accessToken", accessToken, getCookieOptions(process.env.JWT_ACCESS_TOKEN_EXPIRE)).cookie("refreshToken",refreshToken,getCookieOptions(process.env.JWT_REFRESH_TOKEN_EXPIRE)).json(new ApiResponse(200, responseData, "Logged in successfully!"));
 
 });
 
@@ -263,7 +263,7 @@ export const verifyEmailOtp = asyncHandler(async (req, res) => {
         isVerified: loggedInUser.isVerified,
         sessionId
     }
-    return res.status(200).cookie("accessToken",accessToken,getCookieOptions(15*60*1000)).cookie("refreshToken",refreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200,responseData,"Email Verified Successfully. You are now logged in."))
+    return res.status(200).cookie("accessToken",accessToken,getCookieOptions(process.env.JWT_ACCESS_TOKEN_EXPIRE)).cookie("refreshToken",refreshToken,getCookieOptions(process.env.JWT_REFRESH_TOKEN_EXPIRE)).json(new ApiResponse(200,responseData,"Email Verified Successfully. You are now logged in."))
 });
 
 // Resend Verify OTP for email verification
@@ -470,7 +470,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const newAccessToken = jwt.sign({ _id: user._id.toString() }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRE })
     
-    return res.status(200).cookie("accessToken",newAccessToken,getCookieOptions(15*60*1000)).cookie("refreshToken",newRefreshToken,getCookieOptions(7*24*60*60*1000)).json(new ApiResponse(200,{accessToken:newAccessToken},"Token refreshed successfully"))
+    return res.status(200).cookie("accessToken",newAccessToken,getCookieOptions(process.env.JWT_ACCESS_TOKEN_EXPIRE)).cookie("refreshToken",newRefreshToken,getCookieOptions(process.env.JWT_REFRESH_TOKEN_EXPIRE)).json(new ApiResponse(200,{accessToken:newAccessToken},"Token refreshed successfully"))
 });
 
 
