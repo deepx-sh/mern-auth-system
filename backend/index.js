@@ -26,13 +26,14 @@ import connectDB from "./config/db.js";
 import userRouter from "./routes/user.routes.js";
 import mongoSanitize from "express-mongo-sanitize";
 import morgan from "morgan";
+import helmet from "helmet"
 import logger, { morganStream } from "./utils/logger.js";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Database Connection
 connectDB();
-
+app.use(helmet())
 app.use(morgan("combined", { stream: morganStream }));
 app.set("trust proxy", 1);
 app.use(express.json());
