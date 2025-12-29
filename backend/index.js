@@ -37,7 +37,9 @@ app.use(helmet())
 app.use(morgan("combined", { stream: morganStream }));
 app.set("trust proxy", 1);
 app.use(express.json());
-app.use(mongoSanitize())
+app.use(mongoSanitize({
+  replaceWith:'_'
+}))
 app.use(cookieParser());
 
 const allowedOrigin = [
