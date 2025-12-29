@@ -76,6 +76,12 @@ import {
 import ExpressMongoSanitize from "express-mongo-sanitize";
 import { startSessionCleanup } from "./utils/sessionCleanup.js";
 
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString()
+  })
+})
 app.use("/api/auth", authRouter);
 
 app.use("/api/user", userRouter);

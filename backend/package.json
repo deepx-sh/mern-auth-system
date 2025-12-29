@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "securenation-backend",
   "version": "1.0.0",
   "description": "MERN based authentication with JWT, email verification and OTP password reset",
   "main": "index.js",

@@ -42,9 +42,6 @@ const getCookieOptions = (maxAge) => ({
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge,
     path: '/',
-    ...(process.env.NODE_ENV === 'production' && process.env.COOKIE_DOMAIN && {
-        domain:process.env.COOKIE_DOMAIN
-    })
 })
 export const register = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body || {};
