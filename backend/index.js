@@ -33,35 +33,44 @@ const PORT = process.env.PORT || 4000;
 
 // Database Connection
 connectDB();
-app.use(helmet({
-  crossOriginResourcePolicy:{policy:"cross-origin"}
-}))
-app.use(morgan("combined", { stream: morganStream }));
 app.set("trust proxy", 1);
-app.use(express.json());
-app.use(cookieParser());
 
 const allowedOrigin = [
   process.env.CLIENT_URL_LOCAL,
   process.env.CLIENT_URL_PROD,
-  'https://securenation.vercel.app/'
+  'https://securenation.vercel.app'
 ].filter(Boolean);
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
+    // origin: function (origin, callback) {
+    //   if (!origin) return callback(null, true);
 
-      if (allowedOrigin.includes(origin)) {
-        return callback(null, true);
-      }
+    //   if (allowedOrigin.includes(origin)) {
+    //     return callback(null, true);
+    //   }
 
-      return callback(new Error("Not allowed by CORS"));
-    },
+    //   return callback(new Error("Not allowed by CORS"));
+    // },
+    origin: [
+      process.env.CLIENT_URL_LOCAL,
+      process.env.CLIENT_URL_PROD,
+    ],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders:['Content-Type','Authorization']
+    // methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    // allowedHeaders:['Content-Type','Authorization']
   })
 );
+
+app.options("*",cors())
+app.use(helmet({
+  crossOriginResourcePolicy:{policy:"cross-origin"}
+}))
+app.use(morgan("combined", { stream: morganStream }));
+
+app.use(express.json());
+app.use(cookieParser());
+
+
 
 app.use(globalLimiter);
 app.use(apiSpeedLimiter);
