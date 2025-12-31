@@ -33,7 +33,9 @@ const PORT = process.env.PORT || 4000;
 
 // Database Connection
 connectDB();
-app.use(helmet())
+app.use(helmet({
+  crossOriginResourcePolicy:{policy:"cross-origin"}
+}))
 app.use(morgan("combined", { stream: morganStream }));
 app.set("trust proxy", 1);
 app.use(express.json());
