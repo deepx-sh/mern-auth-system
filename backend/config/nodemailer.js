@@ -1,30 +1,31 @@
 import nodemailer from 'nodemailer';
 import logger from '../utils/logger.js';
+import sgMail from '@sendgrid/mail'
 
-logger.info(`SMTP Config: Host=${process.env.SMTP_HOST}, Port=${process.env.SMTP_PORT}, User=${process.env.SMTP_USER}`);
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: true,
-    connectionTimeout: 30000,
-    greetingTimeout:30000,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass:process.env.SMTP_PASS
-    }
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+// const transporter = nodemailer.createTransport({
+//     host: process.env.SMTP_HOST,
+//     port: process.env.SMTP_PORT,
+//     secure: true,
+//     auth: {
+//         user: process.env.SMTP_USER,
+//         pass:process.env.SMTP_PASS
+//     }
+// });
 
 export const sendEmail = async (options)=>{
     try {
         const mailOptions = {
-            from: `SecureNation <${process.env.SMTP_USER}>`,
+            // from: `SecureNation <${process.env.SMTP_USER}>`,
+            from:`SecureNation <${process.env.SENDGRID_FROM_EMAIL}>`,
             to: options.to,
             subject: options.subject,
             text: options.text || undefined,
             html:options.html || undefined
         }
 
-        await transporter.sendMail(mailOptions);
+        // await transporter.sendMail(mailOptions);
+        await sgMail.send(mailOptions)
         logger.info("Mail sent successfully");
         
     } catch (error) {
