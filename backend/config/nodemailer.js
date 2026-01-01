@@ -1,10 +1,13 @@
 import nodemailer from 'nodemailer';
 import logger from '../utils/logger.js';
 
+logger.info(`SMTP Config: Host=${process.env.SMTP_HOST}, Port=${process.env.SMTP_PORT}, User=${process.env.SMTP_USER}`);
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT,
     secure: true,
+    connectionTimeout: 30000,
+    greetingTimeout:30000,
     auth: {
         user: process.env.SMTP_USER,
         pass:process.env.SMTP_PASS
