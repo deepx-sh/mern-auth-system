@@ -42,15 +42,18 @@ const allowedOrigin = [
 ].filter(Boolean);
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
+    // origin: function (origin, callback) {
+    //   if (!origin) return callback(null, true);
 
-      if (allowedOrigin.includes(origin)) {
-        return callback(null, true);
-      }
+    //   if (allowedOrigin.includes(origin)) {
+    //     return callback(null, true);
+    //   }
 
-      return callback(new Error("Not allowed by CORS"));
-    },
+    //   return callback(new Error("Not allowed by CORS"));
+    // },
+    origin: [
+      'https://securenation.vercel.app'
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders:['Content-Type','Authorization']
