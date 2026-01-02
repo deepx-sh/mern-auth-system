@@ -38,6 +38,7 @@ app.set("trust proxy", 1);
 const allowedOrigin = [
   process.env.CLIENT_URL_LOCAL,
   process.env.CLIENT_URL_PROD,
+  'https://securenation.vercel.app'
 ].filter(Boolean);
 app.use(
   cors({
