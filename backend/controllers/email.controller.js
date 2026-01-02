@@ -5,7 +5,7 @@ export const sendWelcomeEmail = async (user)=>{
     try {
         await sendEmail({
             to: user.email,
-            subject: "Welcome to SecureNation 🥳",
+            subject: "Welcome to SecureNation",
             html:welcomeEmailTemplate(user.name),
         })
     } catch (error) {

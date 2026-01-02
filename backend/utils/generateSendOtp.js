@@ -42,13 +42,13 @@ export const generateAndSendOtp = async (user, purpose = "verify") => {
 const getEmailContent = (purpose, user, otp)=>{
     if (purpose === "verify") {
         return {
-            subject: "SecureNation - Verify your email 🔒",
+            subject: "SecureNation - Verify your email",
             html:verifyEmailTemplate(user.name,otp)
         }
     }
     if (purpose === "resetPassword") {
         return {
-            subject: "SecureNation - Reset your password 🔑",
+            subject: "SecureNation - Reset your password",
             html:resetPasswordTemplate(user.name,otp)
         }
     }

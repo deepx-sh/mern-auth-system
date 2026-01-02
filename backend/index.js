@@ -38,33 +38,26 @@ app.set("trust proxy", 1);
 const allowedOrigin = [
   process.env.CLIENT_URL_LOCAL,
   process.env.CLIENT_URL_PROD,
-  'https://securenation.vercel.app'
 ].filter(Boolean);
 app.use(
   cors({
-    // origin: function (origin, callback) {
-    //   if (!origin) return callback(null, true);
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
 
-    //   if (allowedOrigin.includes(origin)) {
-    //     return callback(null, true);
-    //   }
+      if (allowedOrigin.includes(origin)) {
+        return callback(null, true);
+      }
 
-    //   return callback(new Error("Not allowed by CORS"));
-    // },
-    origin: [
-      process.env.CLIENT_URL_LOCAL,
-      process.env.CLIENT_URL_PROD,
-    ],
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
-    // methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    // allowedHeaders:['Content-Type','Authorization']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders:['Content-Type','Authorization']
   })
 );
 
-// app.options("*",cors())
-app.use(helmet({
-  crossOriginResourcePolicy:{policy:"cross-origin"}
-}))
+
+app.use(helmet())
 app.use(morgan("combined", { stream: morganStream }));
 
 app.use(express.json());
@@ -75,7 +68,7 @@ app.use(cookieParser());
 app.use(globalLimiter);
 app.use(apiSpeedLimiter);
 app.get("/", (req, res) => {
-  return res.send("<h1>Home Page</h1>");
+  return res.send("<h1>Welcome to SecureNation</h1>");
 });
 
 // Auth Api Endpoint
