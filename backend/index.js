@@ -6,10 +6,10 @@ const requireEnvVars = [
   "JWT_REFRESH_TOKEN_EXPIRE",
   "JWT_RESET_PASSWORD_SECRET",
   "JWT_RESET_PASSWORD_EXPIRE",
-  "SMTP_HOST",
-  "SMTP_PORT",
-  "SMTP_USER",
-  "SMTP_PASS",
+  "BREVO_SMTP_HOST",
+  "BREVO_SMTP_PORT",
+  "BREVO_SMTP_USER",
+  "BREVO_SMTP_PASS",
 ];
 
 requireEnvVars.forEach((varName) => {
