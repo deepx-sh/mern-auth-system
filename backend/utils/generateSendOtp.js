@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { sendEmail } from "../config/nodemailer.js";
+import  sendEmail  from "../config/nodemailer.js";
 import { resetPasswordTemplate, verifyEmailTemplate } from "./emailTemplate.js";
 
 

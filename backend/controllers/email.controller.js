@@ -1,4 +1,4 @@
-import { sendEmail } from "../config/nodemailer.js";
+import  sendEmail  from "../config/nodemailer.js";
 import { welcomeEmailTemplate } from "../utils/emailTemplate.js";
 
 export const sendWelcomeEmail = async (user)=>{
