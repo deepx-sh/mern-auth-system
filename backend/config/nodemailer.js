@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 const transporter = nodemailer.createTransport({
     host: process.env.BREVO_SMTP_HOST,
