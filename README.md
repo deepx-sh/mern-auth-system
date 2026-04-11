@@ -266,7 +266,7 @@ Speed limiting kicks in after **50 requests** per 15 minutes, adding progressive
 
 ---
 
-## 🌐 Deployment
+## Deployment
 
 ### Backend (Render / Railway)
 1. Set all environment variables from the `.env` table above
