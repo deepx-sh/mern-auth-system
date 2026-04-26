@@ -70,7 +70,7 @@ const Navbar = () => {
               </>
             ) : (
                 <div className='relative'>
-                  <button type='button' onClick={() => setMenuOpen((prev) => !prev)} className='flex items-center gap-2 rounded-full bg-[#111111] px-2 py-1.5 text-sm text-[#F8F8F8] border border-white/10 hover:bg-[#1A1A1A] transition' >
+                  <button type='button' onClick={() => setMenuOpen((prev) => !prev)} className='flex items-center gap-2 rounded-full bg-[#111111] px-2 py-1.5 text-sm cursor-pointer text-[#F8F8F8] border border-white/10 hover:bg-[#1A1A1A] transition' >
                     <div className='flex h-8 w-8 items-center justify-center rounded-full bg-[#FF6B00] text-[#F8F8F8] text-sm font-semibold'>
                       {userInit}
                     </div>
@@ -99,7 +99,7 @@ const Navbar = () => {
                         <button type='button' onClick={() => {
                           handleVerifyEmail();
                           setMenuOpen(false);
-                        }} className='flex w-full items-center justify-between px-3 py-2 hover:bg-[#1A1A1A] transition'>
+                        }} className='flex w-full items-center justify-between cursor-pointer px-3 py-2 hover:bg-[#1A1A1A] transition'>
                           <span>Verify Email</span>
                           <span className='ml-2 rounded-full bg-[#FF6B00] px-2 py-[1px] text-[10px] uppercase tracking-wide'>Pending</span>
                         </button>
@@ -108,17 +108,17 @@ const Navbar = () => {
                       <button type='button' onClick={() => {
                         handleResetPassword();
                         setMenuOpen(false);
-                      }} className='w-full text-left px-3 py-2 hover:bg-[#1A1A1A] transition'>Reset Password</button>
+                      }} className='w-full text-left px-3 cursor-pointer py-2 hover:bg-[#1A1A1A] transition'>Reset Password</button>
 
                       <button type='button' onClick={() => {
                         navigate("/session");
                         setMenuOpen(false);
-                      }} className='w-full text-left px-3 py-2 hover:bg-[#1A1A1A] transition'>Manage Session</button>
+                      }} className='w-full text-left cursor-pointer px-3 py-2 hover:bg-[#1A1A1A] transition'>Manage Session</button>
 
                       <button type='button' onClick={() => {
                         handleLogout();
                         setMenuOpen(false);
-                      }} className='w-full text-left px-3 py-2 text-[#FF6B00] hover:bg-[#1A1A1A] transition'>Logout</button>
+                      }} className='w-full text-left px-3 py-2 cursor-pointer text-[#FF6B00] hover:bg-[#1A1A1A] transition'>Logout</button>
                     </div>
                   )}
                 </div>
