@@ -5,7 +5,7 @@ const PrimaryButton = ({children,loading=false,disabled=false,className="",type=
     const isDisabled = disabled || loading;
 
     return (
-        <button type={type} disabled={isDisabled} aria-busy={loading} className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium ${isDisabled ? "opacity-60 cursor-not-allowed" : ""} bg-[#FF6B00] text-[#F8F8F8] hover:bg-[#E65A00] transition shadow-sm ${className}`} {...rest}>
+        <button type={type} disabled={isDisabled} aria-busy={loading} className={`inline-flex items-center cursor-pointer justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium ${isDisabled ? "opacity-60 cursor-not-allowed" : ""} bg-[#FF6B00] text-[#F8F8F8] hover:bg-[#E65A00] transition shadow-sm ${className}`} {...rest}>
             {loading && (
                  <svg
           className="h-4 w-4 animate-spin"
