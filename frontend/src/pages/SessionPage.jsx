@@ -129,8 +129,8 @@ const SessionPage = () => {
                   </div>
 
                   <div className='flex items-center gap-2'>
-                      <button onClick={fetchSessions} className='px-3 py-2 rounded-md border border-[#E6E6E6] text-sm hover:bg-[#FBF7F3] transition' aria-label='Refresh sessions'>Refresh</button>
-                      <button onClick={handleRevokeAll} className='px-3 py-2 rounded-md bg-[#FF6B00] text-sm text-white hover:bg-[#E65A00] transition shadow' aria-label='Revoke all sessions'>Revoke all</button>
+                      <button onClick={fetchSessions} className='px-3 py-2 rounded-md border cursor-pointer border-[#E6E6E6] text-sm hover:bg-[#FBF7F3] transition' aria-label='Refresh sessions'>Refresh</button>
+                      <button onClick={handleRevokeAll} className='px-3 py-2 rounded-md cursor-pointer bg-[#FF6B00] text-sm text-white hover:bg-[#E65A00] transition shadow' aria-label='Revoke all sessions'>Revoke all</button>
                   </div>
               </div>
 
@@ -186,9 +186,9 @@ const SessionPage = () => {
 
                                           <div className='shrink-0 flex items-center gap-2'>
                                               {s.isCurrent ? (
-                                                  <button onClick={handleLogoutCurrent} disabled={logoutLoading} className='px-3 py-2 rounded-md bg-[#FF6B00] text-white text-sm hover:bg-[#E65A00] transition' title='Log out from this device'>{logoutLoading ? "Signing out..." : "Sign out here"}</button>
+                                                  <button onClick={handleLogoutCurrent} disabled={logoutLoading} className='px-3 py-2 rounded-md bg-[#FF6B00] cursor-pointer text-white text-sm hover:bg-[#E65A00] transition' title='Log out from this device'>{logoutLoading ? "Signing out..." : "Sign out here"}</button>
                                               ) : (
-                                                  <button onClick={() => revokeSession(s.id)} disabled={revokingId === s.id} className='px-3 py-2 rounded-md border border-[#E6E6E6] text-sm hover:bg-[#FFF8F3] transition' title='Revoke this session'>{revokingId === s.id ? "Revoking..." : "Revoke"}</button>
+                                                  <button onClick={() => revokeSession(s.id)} disabled={revokingId === s.id} className='px-3 py-2 rounded-md border cursor-pointer border-[#E6E6E6] text-sm hover:bg-[#FFF8F3] transition' title='Revoke this session'>{revokingId === s.id ? "Revoking..." : "Revoke"}</button>
                                               )}
                                           </div>
                                       </div>
