@@ -55,7 +55,7 @@ const Navbar = () => {
       <div className='mx-auto max-w-6xl px-4 sm:px-6 lg:px-8'>
         <div className='flex h-14 items-center justify-between'>
           {/* Header Logo */}
-          <div className='flex items-center gap-2' onClick={handleLogoClick}>
+          <div className='flex items-center gap-2 cursor-pointer' onClick={handleLogoClick}>
             <div className='flex h-8 w-8 items-center justify-center  overflow-hidden'>
               <ShieldCheck size={32} color="#FF6B00" />
             </div>
